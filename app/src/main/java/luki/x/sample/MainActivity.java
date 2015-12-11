@@ -4,6 +4,8 @@ import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -14,16 +16,12 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
-import java.lang.reflect.Type;
+import java.util.List;
 
 import luki.x.XConfig;
 import luki.x.XParser;
-import luki.x.base.IDataParser;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
-
-	XListFragment xListFragment;
-	XParserFragment xParserFragment;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -48,13 +46,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 		NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
 		navigationView.setNavigationItemSelectedListener(this);
 
-		XParser.INSTANCE.init(new XConfig.Builder(this).taskDataParser(new IDataParser() {
-			@Override
-			public Object from(String s, Type type) throws Exception {
-				return null;
-			}
-
-		}).build());
+		XParser.INSTANCE.init(XConfig.createDefaultConfig(this));
 	}
 
 	@Override
@@ -99,26 +91,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 			// Handle the camera action
 		} else {
 			FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
-			if (id == R.id.nav_gallery) {
-				if (xParserFragment != null) {
-					fragmentTransaction.detach(xParserFragment);
-				}
-				if (xListFragment == null) {
-					xListFragment = new XListFragment();
-					fragmentTransaction.replace(R.id.main_container, xListFragment).commit();
-				} else {
-					fragmentTransaction.attach(xListFragment).commit();
-				}
+			List<Fragment> fragments = getSupportFragmentManager().getFragments();
+			for (int i = 0, size = fragments == null ? 0 : fragments.size(); i < size; i++) {
+				fragmentTransaction.hide(fragments.get(i));
+			}
+			if (id == R.id.x_parser_adapter) {
+				addFragment(fragmentTransaction, XListFragment.class);
 			} else if (id == R.id.nav_slideshow) {
-				if (xListFragment != null) {
-					fragmentTransaction.detach(xListFragment);
-				}
-				if (xParserFragment == null) {
-					xParserFragment = new XParserFragment();
-					fragmentTransaction.replace(R.id.main_container, xParserFragment).commit();
-				} else {
-					fragmentTransaction.attach(xParserFragment).commit();
-				}
+				addFragment(fragmentTransaction, XParserFragment.class);
 			} else if (id == R.id.nav_manage) {
 
 			} else if (id == R.id.nav_share) {
@@ -126,10 +106,30 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 			} else if (id == R.id.nav_send) {
 
 			}
+			fragmentTransaction.commit();
 		}
 
 		DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
 		drawer.closeDrawer(GravityCompat.START);
 		return true;
+	}
+
+	private Fragment addFragment(FragmentTransaction fragmentTransaction, Class<? extends Fragment> clazz) {
+		Fragment fragment = null;
+		List<Fragment> fragments = getSupportFragmentManager().getFragments();
+		for (int i = 0, size = fragments == null ? 0 : fragments.size(); i < size; i++) {
+			Fragment f = fragments.get(i);
+			if (f.getClass() == clazz) {
+				fragment = f;
+				break;
+			}
+		}
+		if (fragment == null) {
+			fragment = Fragment.instantiate(this, clazz.getName());
+			fragmentTransaction.add(R.id.main_container, fragment);
+		} else {
+			fragmentTransaction.show(fragment);
+		}
+		return fragment;
 	}
 }

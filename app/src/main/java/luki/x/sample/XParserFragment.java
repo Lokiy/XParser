@@ -46,6 +46,7 @@ public class XParserFragment extends ListFragment {
 	@Override
 	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
 		inflater.inflate(R.menu.x_parser, menu);
+		getActivity().setTitle(getClass().getSimpleName());
 	}
 
 	@Override

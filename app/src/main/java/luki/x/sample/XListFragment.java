@@ -21,14 +21,11 @@ import android.support.v4.app.ListFragment;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.widget.ArrayAdapter;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import luki.x.inject.content.InjectAdapter;
 import luki.x.sample.adapter.SimpleListAdapter;
-import luki.x.simple.SimpleAdapter;
 
 /**
  * XListFragment
@@ -61,6 +58,7 @@ public class XListFragment extends ListFragment {
 	@Override
 	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
 		inflater.inflate(R.menu.x_list, menu);
+		getActivity().setTitle(getClass().getSimpleName());
 	}
 
 	@Override

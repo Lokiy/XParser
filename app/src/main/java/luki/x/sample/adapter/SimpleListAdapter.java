@@ -16,9 +16,12 @@
 package luki.x.sample.adapter;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.support.design.widget.Snackbar;
 import android.view.View;
-import android.widget.Toast;
+import android.widget.TextView;
+
+import java.util.Random;
 
 import luki.x.inject.content.InjectHolder;
 import luki.x.sample.R;
@@ -30,7 +33,8 @@ import luki.x.simple.SimpleAdapter;
  * Version:1
  */
 public class SimpleListAdapter extends SimpleAdapter<String> {
-	private int mColumnCount = 2;
+	private int mColumnCount = 5;
+	private Snackbar make;
 
 	public SimpleListAdapter(Context context) {
 		super(context);
@@ -61,17 +65,21 @@ public class SimpleListAdapter extends SimpleAdapter<String> {
 
 	@Override
 	public void configViews(InjectHolder holder, final int position) {
-		View v = holder.findViewByString(R.string.v_this);
-		v.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View view) {
-				Snackbar.make(view, position + "", Snackbar.LENGTH_SHORT).show();
-			}
-		});
+		TextView v = holder.findViewByString(R.string.v_this);
+		Random r = new Random();
+		int red = r.nextInt(255);
+		int green = r.nextInt(255);
+		int blue = r.nextInt(255);
+		v.setBackgroundColor(Color.argb(255, red, green, blue));
+		v.setTextColor(Color.argb(255, 255 - red, 255 - green, 255 - blue));
 	}
 
-	@Override
-	public void onItemClick(int position) {
-		Toast.makeText(mContext, position + "", Toast.LENGTH_SHORT).show();
+	public void onClick(View v, int position) {
+		if (make == null) {
+			make = Snackbar.make(v, position + "", Snackbar.LENGTH_SHORT);
+		} else {
+			make.setText(position + "");
+		}
+		make.show();
 	}
 }
