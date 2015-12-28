@@ -16,6 +16,7 @@
 package luki.x.sample;
 
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ListFragment;
 import android.view.Menu;
@@ -28,22 +29,27 @@ import java.util.List;
 import luki.x.sample.adapter.SimpleListAdapter;
 
 /**
- * XListFragment
+ * XParserAdapterFragment
  * Created by Luki on 2015/11/13.
  * Version:1
  */
-public class XListFragment extends ListFragment {
+public class XParserAdapterFragment extends ListFragment {
 
 	private SimpleListAdapter mAdapter;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		List<String> list = dumpData();
-		mAdapter = new SimpleListAdapter(getActivity());
-		mAdapter.addAll(list);
-		setListAdapter(mAdapter);
 		setHasOptionsMenu(true);
+		new Handler().postDelayed(new Runnable() {
+			@Override
+			public void run() {
+				List<String> list = dumpData();
+				mAdapter = new SimpleListAdapter(getActivity());
+				mAdapter.addAll(list);
+				setListAdapter(mAdapter);
+			}
+		}, 500);
 	}
 
 	@NonNull
@@ -57,7 +63,7 @@ public class XListFragment extends ListFragment {
 
 	@Override
 	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-		inflater.inflate(R.menu.x_list, menu);
+		inflater.inflate(R.menu.x_parser_adapter, menu);
 		getActivity().setTitle(getClass().getSimpleName());
 	}
 

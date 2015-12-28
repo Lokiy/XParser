@@ -15,7 +15,12 @@
  */
 package luki.x.db;
 
-import static luki.x.util.DBUtils.PRIMARYKEY_COLUMN;
+import android.content.ContentValues;
+import android.content.Context;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteQueryBuilder;
+import android.text.TextUtils;
 
 import java.io.Serializable;
 import java.lang.reflect.Field;
@@ -26,12 +31,8 @@ import luki.x.base.IDBHelper;
 import luki.x.base.XLog;
 import luki.x.util.DBUtils;
 import luki.x.util.ReflectUtils;
-import android.content.ContentValues;
-import android.content.Context;
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteQueryBuilder;
-import android.text.TextUtils;
+
+import static luki.x.util.DBUtils.PRIMARY_KEY_COLUMN;
 
 /**
  * Simple DBHelper.
@@ -41,7 +42,7 @@ import android.text.TextUtils;
  */
 /*public*/class XDBHelper implements IDBHelper {
 
-	private static final String ROWID_SPLIT = ",";
+	private static final String ROW_ID_SPLIT = ",";
 	private SQLiteDatabase db;
 	private String dbName;
 	private DBUtils dbUtils;
@@ -49,13 +50,13 @@ import android.text.TextUtils;
 	XDBHelper(String dbName, Context context) {
 		check(context);
 		db = new SQLHelper(context.getApplicationContext(), this.dbName = dbName, null, 1).getWritableDatabase();
-		dbUtils = DBUtils.getIntance(db, dbName, this);
+		dbUtils = DBUtils.getInstance(db, dbName, this);
 	}
 
 	/**
 	 * check context
 	 * 
-	 * @param context
+	 * @param context context
 	 */
 	private void check(Context context) {
 		if (context == null) {
@@ -66,13 +67,16 @@ import android.text.TextUtils;
 	/**
 	 * Convenience method for updating or inserting rows in the database.
 	 * 
-	 * @param t updating or inserting data
+	 * @param bean updating or inserting data
 	 * @return the number of rows affected
 	 */
 	@SuppressWarnings("unchecked")
 	public <T extends Serializable> int save(T bean) {
+		if (bean == null) {
+			return 0;
+		}
 		Class<T> clazz = (Class<T>) bean.getClass();
-		Table<T> table = (Table<T>) dbUtils.checkTable(clazz);
+		Table<T> table = dbUtils.checkTable(clazz);
 		String tableName = table.tableName;
 		long _id = getPrimaryKeyValue(clazz, table.uniqueSelection.fillIn(bean));
 		String operation = null;
@@ -80,7 +84,7 @@ import android.text.TextUtils;
 			ContentValues values = dbUtils.getContentValues(bean);
 			if (_id > 0) { // exist and update
 				operation = "UPDATE";
-				values.remove(DBUtils.PRIMARYKEY_COLUMN);
+				values.remove(DBUtils.PRIMARY_KEY_COLUMN);
 				// update the relation table' data( delete all mapping data and the save the relation data's rowID
 				// to the ContentValues).
 				if (table.otherTypeField.size() > 0) {
@@ -88,19 +92,18 @@ import android.text.TextUtils;
 					putRelationTableDataContentValues(bean, table, values);
 				}
 
-				String[] selectionArgs = new String[] { String.valueOf(_id) };
-				db.update(tableName, values, PRIMARYKEY_COLUMN + "=?", selectionArgs);
+				String[] selectionArgs = new String[]{String.valueOf(_id)};
+				db.update(tableName, values, PRIMARY_KEY_COLUMN + "=?", selectionArgs);
 			} else {// not exist and insert
 				operation = "INSERT INTO";
-				values.put(DBUtils.PRIMARYKEY_COLUMN, (String) null);
+				values.put(DBUtils.PRIMARY_KEY_COLUMN, (String) null);
 				// save the relation data's rowID to the ContentValues
 				if (table.otherTypeField.size() > 0) {
 					putRelationTableDataContentValues(bean, table, values);
 				}
 				_id = db.insert(tableName, null, values);
 			}
-			XLog.v(TAG, "operation : %s TABLE %s success. PRIMARYKEY or rowID = %s and the bean = %s ", operation, tableName, _id,
-					bean.toString());
+			XLog.v(TAG, "operation : %s TABLE %s success. PRIMARYKEY or rowID = %s and the bean = %s ", operation, tableName, _id, bean.toString());
 		} catch (Exception e) {
 			XLog.w(TAG, "operation : %s TABLE %s  exception : %s", operation, tableName, e.toString());
 			return 0;
@@ -152,7 +155,7 @@ import android.text.TextUtils;
 			} else {// not exist and insert
 				ContentValues values = dbUtils.getContentValues(t);
 				operation = "INSERT INTO";
-				values.put(PRIMARYKEY_COLUMN, (String) null);
+				values.put(PRIMARY_KEY_COLUMN, (String) null);
 				// save the relation data's rowID to the ContentValues
 				if (table.otherTypeField.size() > 0) {
 					putRelationTableDataContentValues(t, table, values);
@@ -187,7 +190,7 @@ import android.text.TextUtils;
 			if (_id > 0) { // exist and update
 				ContentValues values = dbUtils.getContentValues(t);
 				operation = "UPDATE";
-				values.remove(PRIMARYKEY_COLUMN);
+				values.remove(PRIMARY_KEY_COLUMN);
 				// update the relation table' data( delete all mapping data and the save the relation data's rowID to
 				// the ContentValues).
 				if (table.otherTypeField.size() > 0) {
@@ -196,7 +199,7 @@ import android.text.TextUtils;
 				}
 
 				String[] selectionArgs = new String[] { String.valueOf(_id) };
-				count = db.update(tableName, values, PRIMARYKEY_COLUMN + "=?", selectionArgs);
+				count = db.update(tableName, values, PRIMARY_KEY_COLUMN + "=?", selectionArgs);
 				XLog.v(TAG, "operation : %s TABLE %s success. the number of rows affected = %s and the bean = %s ", operation, tableName,
 						count, t.toString());
 			} else {// not exist, insert?
@@ -213,7 +216,7 @@ import android.text.TextUtils;
 	 * find the data with bean.
 	 * 
 	 * @param bean which contains field' value. And that can auto consist of selection.
-	 * @return
+	 * @return T
 	 */
 	@SuppressWarnings("unchecked")
 	public <T extends Serializable> T findByBean(T bean) {
@@ -239,7 +242,7 @@ import android.text.TextUtils;
 	 * find the data with bean.
 	 * 
 	 * @param bean which contains field' value. And that can auto consist of selection.
-	 * @return
+	 * @return List
 	 */
 	@SuppressWarnings("unchecked")
 	public <T extends Serializable> List<T> selectByBean(T bean) {
@@ -259,7 +262,7 @@ import android.text.TextUtils;
 	public <T extends Serializable> List<T> selectBySelection(Class<T> clazz, DBSelection<T> selection) {
 		checkClass(clazz);
 		List<T> list = new ArrayList<T>();
-		Table<T> table = (Table<T>) dbUtils.checkTable(clazz);
+		Table<T> table = dbUtils.checkTable(clazz);
 		Cursor c = null;
 		try {
 			if (selection == null) {
@@ -271,9 +274,8 @@ import android.text.TextUtils;
 						selection.orderBy, null);
 				if (selectionArgs != null) {
 					sql = sql.replace("?", "%s");
-					String[] src = selectionArgs;
-					Object[] dest = new Object[src.length];
-					System.arraycopy(src, 0, dest, 0, src.length);
+					Object[] dest = new Object[selectionArgs.length];
+					System.arraycopy(selectionArgs, 0, dest, 0, selectionArgs.length);
 					XLog.v(TAG, sql, dest);
 				} else {
 					XLog.v(TAG, sql);
@@ -363,9 +365,9 @@ import android.text.TextUtils;
 	/**
 	 * add the relation data to t.
 	 * 
-	 * @param c
-	 * @param table
-	 * @param t
+	 * @param c cursor
+	 * @param table table
+	 * @param t t
 	 * @throws Exception
 	 */
 	private <T extends Serializable> void addRelationData(Cursor c, Table<T> table, T t) throws Exception {
@@ -391,7 +393,7 @@ import android.text.TextUtils;
 			dbSelection.selection = "ROWID=?";
 			if (field.getType() == List.class || field.getType() == ArrayList.class) {
 				List<T> l = new ArrayList<T>();
-				String[] rowIDs = cv.split(ROWID_SPLIT);
+				String[] rowIDs = cv.split(ROW_ID_SPLIT);
 				for (String rowID : rowIDs) {
 					dbSelection.selectionArgs = new String[] { rowID };
 					l.addAll(selectBySelection(clazz1, dbSelection));
@@ -424,7 +426,7 @@ import android.text.TextUtils;
 	 */
 	private <T extends Serializable> void deleteRelationTableData(Class<T> clazz, DBSelection<T> selection, Table<T> table) {
 		if (table == null) {
-			table = (Table<T>) dbUtils.checkTable(clazz);
+			table = dbUtils.checkTable(clazz);
 		}
 		Cursor c = db.query(table.tableName, null, selection.selection, selection.selectionArgs, null, null, null);
 		if (c != null && c.moveToFirst()) {
@@ -442,7 +444,7 @@ import android.text.TextUtils;
 				if (TextUtils.isEmpty(cv)) {
 					continue;
 				}
-				String[] rowIDs = cv.split(ROWID_SPLIT);
+				String[] rowIDs = cv.split(ROW_ID_SPLIT);
 				for (String rowID : rowIDs) {
 					DBSelection<T> sel = new DBSelection<T>();
 					sel.selection = "ROWID=?";
@@ -487,10 +489,10 @@ import android.text.TextUtils;
 						if (t == null) {
 							continue;
 						}
-						columnValues.append(ROWID_SPLIT);
+						columnValues.append(ROW_ID_SPLIT);
 						columnValues.append(insert(t));
 					}
-					columnValues.delete(0, ROWID_SPLIT.length());
+					columnValues.delete(0, ROW_ID_SPLIT.length());
 				} else {
 					T obj = (T) field.get(bean);
 					if (obj == null) {
@@ -517,7 +519,7 @@ import android.text.TextUtils;
 			if (uniqueSelection.selectionArgs.length > 0) {
 				c = db.query(clazz.getSimpleName(), null, uniqueSelection.selection, uniqueSelection.selectionArgs, null, null, null);
 				if (c != null && c.moveToFirst()) {
-					int columnIndex = c.getColumnIndex(DBUtils.PRIMARYKEY_COLUMN);
+					int columnIndex = c.getColumnIndex(DBUtils.PRIMARY_KEY_COLUMN);
 					_id = c.getLong(columnIndex);
 				}
 			}

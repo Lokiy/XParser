@@ -5,7 +5,6 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -96,9 +95,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 				fragmentTransaction.hide(fragments.get(i));
 			}
 			if (id == R.id.x_parser_adapter) {
-				addFragment(fragmentTransaction, XListFragment.class);
-			} else if (id == R.id.nav_slideshow) {
-				addFragment(fragmentTransaction, XParserFragment.class);
+				addFragment(fragmentTransaction, XParserAdapterFragment.class);
+			} else if (id == R.id.x_parser_db) {
+				addFragment(fragmentTransaction, XDBHelperFragment.class);
 			} else if (id == R.id.nav_manage) {
 
 			} else if (id == R.id.nav_share) {

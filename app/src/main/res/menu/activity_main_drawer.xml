@@ -3,8 +3,8 @@
 
     <group android:checkableBehavior="single">
         <item android:id="@+id/nav_camara" android:icon="@android:drawable/ic_menu_camera" android:title="Import" />
-        <item android:id="@+id/x_parser_adapter" android:icon="@android:drawable/ic_menu_gallery" android:title="x_parser_adapter" />
-        <item android:id="@+id/nav_slideshow" android:icon="@android:drawable/ic_menu_slideshow" android:title="Slideshow" />
+        <item android:id="@+id/x_parser_adapter" android:icon="@android:drawable/ic_menu_gallery" android:title="ParserAdapter" />
+        <item android:id="@+id/x_parser_db" android:icon="@android:drawable/ic_menu_slideshow" android:title="ParserDBHelper" />
         <item android:id="@+id/nav_manage" android:icon="@android:drawable/ic_menu_manage" android:title="Tools" />
     </group>
 

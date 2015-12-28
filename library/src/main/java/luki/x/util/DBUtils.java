@@ -15,6 +15,11 @@
  */
 package luki.x.util;
 
+import android.content.ContentValues;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.text.TextUtils;
+
 import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -39,20 +44,16 @@ import luki.x.db.annotation.OrderBy.SortAs;
 import luki.x.db.annotation.Rename;
 import luki.x.db.annotation.TableVersion;
 import luki.x.db.annotation.Unique;
-import android.content.ContentValues;
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
-import android.text.TextUtils;
 
 public class DBUtils {
 
 	private final String TAG = "XDBHelper";
 	public static final String TABLE_INFO = "table_info";
-	public static final String PRIMARYKEY_COLUMN = "_id";
+	public static final String PRIMARY_KEY_COLUMN = "_id";
 	public static final String TIME_COLUMN = "_modify_time";
 
-	@SuppressWarnings("rawtypes") public static Map<String, Table> tableMap = new HashMap<String, Table>();
-	private static final Map<String, DBUtils> instanceMap = new HashMap<String, DBUtils>();
+	public static Map<String, Table> tableMap = new HashMap<>();
+	private static final Map<String, DBUtils> instanceMap = new HashMap<>();
 	private SQLiteDatabase db;
 	private String dbName;
 	private IDBHelper helper;
@@ -63,7 +64,7 @@ public class DBUtils {
 		this.helper = helper;
 	}
 
-	public static DBUtils getIntance(SQLiteDatabase db, String dbName, IDBHelper helper) {
+	public static DBUtils getInstance(SQLiteDatabase db, String dbName, IDBHelper helper) {
 		DBUtils dbUtils;
 		if ((dbUtils = instanceMap.get(dbName)) == null) {
 			dbUtils = new DBUtils(db, dbName, helper);
@@ -75,16 +76,14 @@ public class DBUtils {
 	/**
 	 * Unique Selection
 	 * 
-	 * @param bean
-	 * @return
-	 * @throws IllegalArgumentException
-	 * @throws IllegalAccessException
+	 * @param clazz class
+	 * @return DBSelection
 	 */
 	public <T extends Serializable> DBSelection<T> getUniqueSelection(Class<T> clazz) {
 		DBSelection<T> dbSelection = new DBSelection<T>();
-		StringBuffer selection = new StringBuffer();
+		StringBuilder selection = new StringBuilder();
 		Field[] fields = clazz.getDeclaredFields();
-		List<Field> l = new ArrayList<Field>();
+		List<Field> l = new ArrayList<>();
 		for (Field f : fields) {
 			f.setAccessible(true);
 			if (isNotExcept(f) && f.getAnnotation(Unique.class) != null) {
@@ -108,17 +107,15 @@ public class DBUtils {
 	/**
 	 * ContentValues
 	 * 
-	 * @param bean
-	 * @return
-	 * @throws IllegalArgumentException
-	 * @throws IllegalAccessException
+	 * @param bean bean
+	 * @return DBSelection
 	 */
 	public <T extends Serializable> DBSelection<T> getSelection(T bean) {
-		DBSelection<T> dbSelection = new DBSelection<T>();
-		StringBuffer selection = new StringBuffer();
-		StringBuffer orderBy = new StringBuffer();
-		List<Field> orderByList = new ArrayList<Field>();
-		List<String> values = new ArrayList<String>();
+		DBSelection<T> dbSelection = new DBSelection<>();
+		StringBuilder selection = new StringBuilder();
+		StringBuilder orderBy = new StringBuilder();
+		List<Field> orderByList = new ArrayList<>();
+		List<String> values = new ArrayList<>();
 		Field[] fields = bean.getClass().getDeclaredFields();
 		boolean isSort = false;
 		for (Field f : fields) {
@@ -193,8 +190,8 @@ public class DBUtils {
 	/**
 	 * 得到插入表的ContentValues
 	 * 
-	 * @param bean
-	 * @return
+	 * @param bean bean
+	 * @return ContentValues
 	 * @throws Exception
 	 */
 	public <T extends Serializable> ContentValues getContentValues(T bean) throws Exception {
@@ -232,7 +229,7 @@ public class DBUtils {
 					values.put(name, (Byte) value);
 				} else if (value instanceof Boolean) {
 					values.put(name, (Boolean) value);
-				} else if (value instanceof Byte[]) {
+				} else if (value instanceof byte[]) {
 					values.put(name, (byte[]) value);
 				} else {
 					// 不是标准数据类型 联查表设置值还是抛弃？ 暂时在插入和更新的时候自己联查
@@ -240,7 +237,7 @@ public class DBUtils {
 			}
 		}
 		if (!hasUnique) {
-			values.put(PRIMARYKEY_COLUMN, (String) null);
+			values.put(PRIMARY_KEY_COLUMN, (String) null);
 		}
 		values.put(TIME_COLUMN, System.currentTimeMillis());
 		return values;
@@ -249,9 +246,7 @@ public class DBUtils {
 	/**
 	 * create the table with the class.
 	 * 
-	 * @param clazz
-	 * @param table
-	 * @return
+	 * @param clazz clazz
 	 */
 	public <T extends Serializable> void createTable(Class<T> clazz) {
 		db.execSQL(getCreateTableSQL(clazz, null));
@@ -260,9 +255,9 @@ public class DBUtils {
 	/**
 	 * 获取创建表的语句
 	 * 
-	 * @param clazz
-	 * @param table
-	 * @return
+	 * @param clazz clazz
+	 * @param tableName tableName
+	 * @return SQL String
 	 */
 	@SuppressWarnings("unchecked")
 	public <T extends Serializable> String getCreateTableSQL(Class<T> clazz, String tableName) {
@@ -270,10 +265,10 @@ public class DBUtils {
 			tableName = clazz.getSimpleName();
 		}
 		StringBuilder sql = new StringBuilder();
-		sql.append("CREATE TABLE IF NOT EXISTS " + tableName + "(");
+		sql.append("CREATE TABLE IF NOT EXISTS ").append(tableName).append("(");
 		Field[] fields = clazz.getDeclaredFields();
 		sql.append("`");
-		sql.append(PRIMARYKEY_COLUMN);
+		sql.append(PRIMARY_KEY_COLUMN);
 		sql.append("`");
 		sql.append(" INTEGER PRIMARY KEY AUTOINCREMENT ");
 		sql.append(",");
@@ -319,8 +314,8 @@ public class DBUtils {
 	/**
 	 * 根据游标给一个Object 设置属性
 	 * 
-	 * @param bean
-	 * @param c
+	 * @param bean bean
+	 * @param c cursor
 	 * @throws IllegalArgumentException
 	 * @throws IllegalAccessException
 	 */
@@ -368,12 +363,12 @@ public class DBUtils {
 	 * instantiated as if by a new
 	 * expression with an empty argument list. The class is initialized if it has not already been initialized.
 	 * 
-	 * @param clazz
-	 * @param c
-	 * @return
+	 * @param clazz clazz
+	 * @param c cursor
+	 * @return T
 	 */
 	public <T extends Serializable> T getObject(Class<T> clazz, Cursor c) throws Exception {
-		T t = (T) clazz.newInstance();
+		T t = clazz.newInstance();
 		setObject(t, c);
 		return t;
 	}
@@ -381,7 +376,7 @@ public class DBUtils {
 	/**
 	 * check table is exist.
 	 * 
-	 * @param clazz
+	 * @param clazz class
 	 * @return the table instance.
 	 */
 	@SuppressWarnings("unchecked")
@@ -393,7 +388,7 @@ public class DBUtils {
 		String key = dbName + "_" + tableName;
 		Table<T> table = tableMap.get(key);
 		if (table == null) {
-			table = new Table<T>();
+			table = new Table<>();
 			table.tableName = tableName;
 			table.tableClass = clazz;
 			Field[] fields = clazz.getDeclaredFields();
@@ -406,7 +401,7 @@ public class DBUtils {
 			tableMap.put(key, table);
 		} else
 			return table;
-		Table<TableInfo> tableInfo = (Table<TableInfo>) checkTable(TableInfo.class);
+		Table<TableInfo> tableInfo = checkTable(TableInfo.class);
 		Cursor cursor = null;
 		try {
 			table.uniqueSelection = getUniqueSelection(clazz);
@@ -452,7 +447,6 @@ public class DBUtils {
 			e.printStackTrace();
 		} finally {
 			if (cursor != null) cursor.close();
-			cursor = null;
 		}
 		return table;
 	}
@@ -465,11 +459,10 @@ public class DBUtils {
 			return;
 		}
 		Field[] fields = clazz.getDeclaredFields();
-		List<String> deleteColumns = new ArrayList<String>();
-		List<String> addColumns = new ArrayList<String>();
-		Map<String, List<String>> renameColumns = new HashMap<String, List<String>>();
-		StringBuffer newColumns = new StringBuffer(PRIMARYKEY_COLUMN + "," + TIME_COLUMN);
-		StringBuffer orignalColumns = new StringBuffer(PRIMARYKEY_COLUMN + "," + TIME_COLUMN);
+		List<String> addColumns = new ArrayList<>();
+		Map<String, List<String>> renameColumns = new HashMap<>();
+		StringBuilder newColumns = new StringBuilder(PRIMARY_KEY_COLUMN + "," + TIME_COLUMN);
+		StringBuilder originalColumns = new StringBuilder(PRIMARY_KEY_COLUMN + "," + TIME_COLUMN);
 		for (Field f : fields) {
 			f.setAccessible(true);
 			if (!isNotExcept(f)) {
@@ -483,27 +476,13 @@ public class DBUtils {
 			}
 			boolean isExist = c.getColumnIndex(columnName) > 0;
 			if (isExist) {// exist column. no change
-				newColumns.append(",");
-				newColumns.append("`");
-				newColumns.append(columnName);
-				newColumns.append("`");
-				orignalColumns.append(",");
-				orignalColumns.append("`");
-				orignalColumns.append(columnName);
-				orignalColumns.append("`");
+				addColumn(newColumns, originalColumns, columnName, columnName);
 			} else { // not exist. delete or rename or add
 				if (r != null && names.length > 0) { // rename.
-					for (String orginalColumn : names) {
-						isExist = c.getColumnIndex(orginalColumn) > 0;
+					for (String originalColumn : names) {
+						isExist = c.getColumnIndex(originalColumn) > 0;
 						if (isExist) {
-							newColumns.append(",");
-							newColumns.append("`");
-							newColumns.append(columnName);
-							newColumns.append("`");
-							orignalColumns.append(",");
-							orignalColumns.append("`");
-							orignalColumns.append(columnName);
-							orignalColumns.append("`");
+							addColumn(newColumns, originalColumns, columnName, originalColumn);
 							break;
 						}
 					}
@@ -514,11 +493,11 @@ public class DBUtils {
 			}
 		}
 
-		if (!deleteColumns.isEmpty() || !renameColumns.isEmpty()) {
+		if (!newColumns.toString().equals(originalColumns.toString()) || !renameColumns.isEmpty()) {
 			String tempTableName = "temp_" + tableName;
 			db.execSQL(getCreateTableSQL(clazz, tempTableName));
 
-			sql = "INSERT INTO " + tempTableName + "(" + newColumns.toString() + ") SELECT " + orignalColumns.toString() + " FROM "
+			sql = "INSERT INTO " + tempTableName + "(" + newColumns.toString() + ") SELECT " + originalColumns.toString() + " FROM "
 					+ tableName;
 			XLog.v(TAG, sql);
 			db.execSQL(sql);
@@ -532,7 +511,8 @@ public class DBUtils {
 			sql = "DROP TABLE " + tempTableName;
 			XLog.v(TAG, sql);
 			db.execSQL(sql);
-		} else if (!addColumns.isEmpty()) {
+		}
+		if (!addColumns.isEmpty()) {
 			for (String column : addColumns) {
 				sql = "ALTER TABLE " + tableName + " ADD COLUMN " + column + " TEXT DEFAULT '';";
 				db.execSQL(sql);
@@ -543,8 +523,19 @@ public class DBUtils {
 		c.close();
 	}
 
+	private void addColumn(StringBuilder newColumns, StringBuilder originalColumns, String columnName, String originalColumn) {
+		newColumns.append(",");
+		newColumns.append("`");
+		newColumns.append(columnName);
+		newColumns.append("`");
+		originalColumns.append(",");
+		originalColumns.append("`");
+		originalColumns.append(originalColumn);
+		originalColumns.append("`");
+	}
+
 	private String[] dealEmptyValue(String[] args) {
-		List<String> list = new ArrayList<String>();
+		List<String> list = new ArrayList<>();
 		for (String string : args) {
 			if (!TextUtils.isEmpty(string)) {
 				list.add(string);

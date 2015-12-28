@@ -75,11 +75,6 @@ public class SimpleListAdapter extends SimpleAdapter<String> {
 	}
 
 	public void onClick(View v, int position) {
-		if (make == null) {
-			make = Snackbar.make(v, position + "", Snackbar.LENGTH_SHORT);
-		} else {
-			make.setText(position + "");
-		}
-		make.show();
+		Snackbar.make(v, position + "", Snackbar.LENGTH_SHORT).show();
 	}
 }

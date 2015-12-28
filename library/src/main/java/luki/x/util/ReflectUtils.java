@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -15,6 +15,8 @@
  */
 package luki.x.util;
 
+import android.content.Context;
+
 import java.io.File;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -23,7 +25,6 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
-import android.content.Context;
 import dalvik.system.DexClassLoader;
 
 public class ReflectUtils {
@@ -32,6 +33,7 @@ public class ReflectUtils {
 	 * @param item
 	 * @param field
 	 * @return
+	 *
 	 * @throws Exception
 	 */
 	public static Object getFieldValue(Object item, String field) throws Exception {
@@ -39,7 +41,8 @@ public class ReflectUtils {
 		Field f = null;
 		try {
 			f = cls.getDeclaredField(field);
-		} catch (Exception e) {}
+		} catch (Exception e) {
+		}
 		if (f == null) {
 			f = cls.getField(field);
 		}
@@ -54,6 +57,7 @@ public class ReflectUtils {
 	 * @param item
 	 * @param field
 	 * @return
+	 *
 	 * @throws Exception
 	 */
 	public static void setFieldValue(Object item, String field, Object value) throws Exception {
@@ -61,7 +65,8 @@ public class ReflectUtils {
 		Field f = null;
 		try {
 			f = cls.getDeclaredField(field);
-		} catch (Exception e) {}
+		} catch (Exception e) {
+		}
 		if (f == null) {
 			f = cls.getField(field);
 		}
@@ -76,6 +81,7 @@ public class ReflectUtils {
 	 * @param item
 	 * @param method
 	 * @return
+	 *
 	 * @throws Exception
 	 */
 	public static Object getMethodValue(Object item, String method) throws Exception {
@@ -83,7 +89,8 @@ public class ReflectUtils {
 		Method m = null;
 		try {
 			m = cls.getDeclaredMethod(method);
-		} catch (Exception e) {}
+		} catch (Exception e) {
+		}
 		if (m == null) {
 			m = cls.getMethod(method);
 		}
@@ -97,6 +104,7 @@ public class ReflectUtils {
 	/**
 	 * @param className
 	 * @return
+	 *
 	 * @throws Exception
 	 */
 	public static Object getClassIntance(String className) throws Exception {
@@ -106,17 +114,14 @@ public class ReflectUtils {
 
 	/**
 	 * is normal GenericType(include Long,long,String,Double,double...)
-	 * 
-	 * @param type
-	 * @return
+	 *
+	 * @param type type
+	 * @return is normal generic type
 	 */
 	public static boolean isNormalGenericType(Type type) {
-		if (type == Long.class || type == long.class || type == String.class || type == Double.class || type == double.class
-				|| type == Integer.class || type == int.class || type == Float.class || type == float.class || type == Short.class
-				|| type == short.class || type == Byte[].class || type == byte[].class || type == boolean.class || type == Boolean.class) {
-			return true;
-		}
-		return false;
+		return type == Long.class || type == long.class || type == String.class || type == Double.class || type == double.class ||
+				type == Integer.class || type == int.class || type == Float.class || type == float.class || type == Short.class ||
+				type == short.class || type == Byte[].class || type == byte[].class || type == boolean.class || type == Boolean.class;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -134,7 +139,7 @@ public class ReflectUtils {
 
 	/**
 	 * has Parameterless constructor
-	 * 
+	 *
 	 * @param clazz class
 	 * @return has parameterless ,return true.otherwise false.
 	 */
@@ -160,8 +165,7 @@ public class ReflectUtils {
 	}
 
 	@SuppressWarnings("unchecked")
-	public static <T> Class<? extends T> loadClass(Context context, String className, String filePath, String fileName, Class<T> clazz,
-			Class<? extends T> defaultClazz) {
+	public static <T> Class<? extends T> loadClass(Context context, String className, String filePath, String fileName, Class<T> clazz, Class<? extends T> defaultClazz) {
 		try {
 			final File dexInternalStoragePath = new File(filePath, fileName);
 			final File optimizedDexOutputPath = context.getDir("outdex", Context.MODE_PRIVATE);
