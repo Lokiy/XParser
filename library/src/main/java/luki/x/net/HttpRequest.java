@@ -19,15 +19,15 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.URLConnection;
-import java.util.List;
 import java.util.Map;
 
 /**
  *
  */
 public class HttpRequest {
+
 	/**
 	 * 向指定URL发送GET方法的请求
 	 *
@@ -41,11 +41,11 @@ public class HttpRequest {
 		try {
 			URL realUrl = new URL(url);
 			// 打开和URL之间的连接
-			URLConnection connection = realUrl.openConnection();
+			HttpURLConnection connection = (HttpURLConnection) realUrl.openConnection();
+			connection.setRequestMethod("GET");
 			connection.setConnectTimeout(timeoutMillis);
 			// 设置通用的请求属性
-			connection.setRequestProperty("accept", "*/*");
-			connection.setRequestProperty("connection", "Keep-Alive");
+			connection.setRequestProperty("Connection", "Keep-Alive");
 			for (String key : headers.keySet()) {
 				connection.setRequestProperty(key, headers.get(key));
 			}
@@ -72,32 +72,40 @@ public class HttpRequest {
 	/**
 	 * 向指定 URL 发送POST方法的请求
 	 *
-	 * @param url   发送请求的 URL
-	 * @param param 请求参数，请求参数应该是 name1=value1&name2=value2 的形式。
+	 * @param url    发送请求的 URL
+	 * @param params 请求参数，请求参数应该是 name1=value1&name2=value2 的形式。
 	 * @return 所代表远程资源的响应结果
 	 */
-	public static String sendPost(String url, int timeoutMillis, Map<String, String> param, Map<String, String> headers) throws IOException {
+	public static String sendPost(String url, int timeoutMillis, Map<String, String> params, Map<String, String> headers) throws IOException {
 		PrintWriter out = null;
 		BufferedReader in = null;
 		String result = "";
 		try {
 			URL realUrl = new URL(url);
 			// 打开和URL之间的连接
-			URLConnection connection = realUrl.openConnection();
+			HttpURLConnection connection = (HttpURLConnection) realUrl.openConnection();
+			connection.setRequestMethod("POST");
 			connection.setConnectTimeout(timeoutMillis);
-			// 设置通用的请求属性
-			connection.setRequestProperty("accept", "*/*");
-			connection.setRequestProperty("connection", "Keep-Alive");
-			for (String key : headers.keySet()) {
-				connection.setRequestProperty(key, headers.get(key));
-			}
+			connection.setReadTimeout(timeoutMillis);
 			// 发送POST请求必须设置如下两行
 			connection.setDoOutput(true);
 			connection.setDoInput(true);
+			// 设置通用的请求属性
+			connection.setRequestProperty("Connection", "Keep-Alive");
+			for (String key : headers.keySet()) {
+				connection.setRequestProperty(key, headers.get(key));
+			}
 			// 获取URLConnection对象对应的输出流
 			out = new PrintWriter(connection.getOutputStream());
 			// 发送请求参数
-			out.print(param);
+			StringBuilder param = new StringBuilder();
+			for (String key : params.keySet()) {
+				param.append(key).append("=").append(params.get(key)).append("&");
+			}
+			if (param.length() > 0) {
+				param.deleteCharAt(param.length() - 1);
+			}
+			out.print(param.toString());
 			// flush输出流的缓冲
 			out.flush();
 			// 定义BufferedReader输入流来读取URL的响应
@@ -120,4 +128,5 @@ public class HttpRequest {
 		}
 		return result;
 	}
+
 }

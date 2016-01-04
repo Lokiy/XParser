@@ -70,15 +70,21 @@ public class TaskEngine<T extends Serializable> extends AsyncTask<TaskParams<T>,
 			if ((NetStatusUtils.isNetworkConnected() && (mParams.isForceRefresh || isCacheDataFailure(key, mParams.cacheTime)))) {
 				String resultString = null;
 				try {
-					if (mParams.method != NetUtils.Method.POST) {
-						resultString = mNetUtils.post(httpUrl, requestParams, mParams.getHeaders());
-					} else
-						resultString = mNetUtils.get(httpUrl, mParams.getHeaders());
-					log(generateKey, resultString, millis, requestParams);
+					switch (mParams.method) {
+						case GET:
+							resultString = mNetUtils.get(httpUrl, mParams.getHeaders());
+							break;
+						case POST:
+						default:
+							resultString = mNetUtils.post(httpUrl, requestParams, mParams.getHeaders());
+								break;
+					}
+					log(resultString, millis);
 					parse(result, resultString);
 				} catch (Exception e) {
 					result.status = ResultStatus.ERROR;
 					result.e = e;
+					log(e.toString(), millis);
 //					XLog.e(TAG, e.toString());
 				}
 				if (result.status == ResultStatus.SUCCESS && mParams.isAllowLoadCache) {
@@ -92,7 +98,7 @@ public class TaskEngine<T extends Serializable> extends AsyncTask<TaskParams<T>,
 				result = readObject(key);
 			}
 		} catch (Exception e) {
-			log(generateKey, e.toString(), millis, requestParams);
+			log(e.toString(), millis);
 			result.e = e;
 			XLog.e(mParams.TAG, e.toString());
 			if (mParams.isAllowLoadCache) {
@@ -167,7 +173,7 @@ public class TaskEngine<T extends Serializable> extends AsyncTask<TaskParams<T>,
 		return isFailure;
 	}
 
-	private void log(String generateKey, String resultString, long millis, Map<String, String> map) {
+	private void log(String resultString, long millis) {
 		if (XLog.isLogging()) {
 			StringBuilder sb = new StringBuilder();
 			sb.append("\n------------START--------------");
@@ -184,6 +190,7 @@ public class TaskEngine<T extends Serializable> extends AsyncTask<TaskParams<T>,
 				}
 
 			}
+			Map<String, String> map = mParams.getParams();
 			if (map != null && map.size() > 0) {
 				sb.append("-----------params--------------\n");
 				for (String str : map.keySet()) {
@@ -197,15 +204,15 @@ public class TaskEngine<T extends Serializable> extends AsyncTask<TaskParams<T>,
 			XLog.d(mParams.TAG, sb.toString());
 			long coast = System.currentTimeMillis() - millis;
 			if (coast < 500) {
-				XLog.v(mParams.TAG, "^_^!It's spend %d milliseconds to get data from %s", coast, generateKey);
+				XLog.v(mParams.TAG, "^_^!It's spend %d milliseconds to get data from %s", coast, mParams.url);
 			} else if (coast < 1000) {
-				XLog.d(mParams.TAG, "^_^!It's spend %d milliseconds to get data from %s", coast, generateKey);
+				XLog.d(mParams.TAG, "^_^!It's spend %d milliseconds to get data from %s", coast, mParams.url);
 			} else if (coast < 3000) {
-				XLog.i(mParams.TAG, "-_-!It's spend %d milliseconds to get data from %s", coast, generateKey);
+				XLog.i(mParams.TAG, "-_-!It's spend %d milliseconds to get data from %s", coast, mParams.url);
 			} else if (coast < 5000) {
-				XLog.w(mParams.TAG, "-_-!!It's spend %d milliseconds to get data from %s", coast, generateKey);
+				XLog.w(mParams.TAG, "-_-!!It's spend %d milliseconds to get data from %s", coast, mParams.url);
 			} else {
-				XLog.e(mParams.TAG, "-_-!!!It's spend %d milliseconds to get data from %s", coast, generateKey);
+				XLog.e(mParams.TAG, "-_-!!!It's spend %d milliseconds to get data from %s", coast, mParams.url);
 			}
 		}
 	}
