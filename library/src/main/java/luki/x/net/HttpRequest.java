@@ -21,6 +21,8 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLEncoder;
+import java.nio.charset.Charset;
 import java.util.Map;
 
 /**
@@ -100,7 +102,7 @@ public class HttpRequest {
 			// 发送请求参数
 			StringBuilder param = new StringBuilder();
 			for (String key : params.keySet()) {
-				param.append(key).append("=").append(params.get(key)).append("&");
+				param.append(key).append("=").append(URLEncoder.encode(params.get(key), "UTF-8")).append("&");
 			}
 			if (param.length() > 0) {
 				param.deleteCharAt(param.length() - 1);

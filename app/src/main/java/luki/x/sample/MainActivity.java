@@ -98,8 +98,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 				addFragment(fragmentTransaction, XParserAdapterFragment.class);
 			} else if (id == R.id.x_parser_db) {
 				addFragment(fragmentTransaction, XDBHelperFragment.class);
-			} else if (id == R.id.nav_manage) {
-
+			} else if (id == R.id.nav_download) {
+				addFragment(fragmentTransaction, DownloadHelperFragment.class);
 			} else if (id == R.id.nav_share) {
 
 			} else if (id == R.id.nav_send) {
