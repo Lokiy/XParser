@@ -37,6 +37,7 @@ import java.net.UnknownHostException;
 import luki.x.XConfig;
 import luki.x.util.NetStatusUtils.NetType;
 
+@SuppressWarnings("unused")
 public class DownloadHelper {
 
 	public static final String EXTRA_MAX_SIZE = "maxSize";
@@ -47,7 +48,7 @@ public class DownloadHelper {
 	private static final String TAG = DownloadHelper.class.getSimpleName();
 	private static Handler handler = new MyHandler();
 	private BroadcastReceiver receiver = new NetBroadcastReceiver();
-	private Thread downloadThread = new DownloadThread();
+	private Thread downloadThread;
 
 	private OnDownloadProgressUpgradeListener listener;
 	private DownloadBean downloadBean;
@@ -75,6 +76,9 @@ public class DownloadHelper {
 
 	public synchronized void start() {
 		this.isInterrupt = false;
+		if (downloadThread == null) {
+			downloadThread = new DownloadThread();
+		}
 		// 下载路径
 		if (!downloadThread.isAlive())
 			downloadThread.start();
@@ -115,7 +119,6 @@ public class DownloadHelper {
 					Intent intent = new Intent();
 					intent.setAction(ACTION_FINISH);
 					task.context.sendBroadcast(intent);
-					task.context.unregisterReceiver(task.receiver);
 				}
 				task.listener.onDownloadProgressUpgrade(current, maxSize);
 			}
@@ -135,48 +138,44 @@ public class DownloadHelper {
 
 			HttpURLConnection httpURLConnection;
 			BufferedInputStream bis;
-			URL url;
 			// 下载文件
 			try {
 				byte[] buf = new byte[10240];
-				// 检查本地文件
-				RandomAccessFile rndFile;
 				long remoteFileSize = getRemoteFileSize(downloadBean.downloadUrl);
 
 				// 获取文件对象，开始往文件里面写内容
 				File file = new File(downloadBean.filePath + "/" + downloadBean.fileName);
-				File tempFile = new File(downloadBean.filePath + "/" + downloadBean.fileName + ".tmp");
-				if (!tempFile.getParentFile().exists()) {
-					//noinspection ResultOfMethodCallIgnored
-					tempFile.getParentFile().mkdirs();
-				}
-				if (!tempFile.exists()) {
-					//noinspection ResultOfMethodCallIgnored
-					tempFile.createNewFile();
-				}
-				long tempFileSize = tempFile.length();
-				if (remoteFileSize != 0 && file.exists() && file.length() == remoteFileSize) {
+				if (remoteFileSize != 0 && file.exists() && file.length() >= remoteFileSize) {
 					sendMessage(remoteFileSize, remoteFileSize);
 					return;
 				}
-
+				File tempFile = new File(downloadBean.filePath + "/" + downloadBean.fileName + ".tmp");
+				long tempFileSize = tempFile.length();
 				// 验证下载文件的完整性
-				if (remoteFileSize != 0 && remoteFileSize == tempFileSize) {
+				if (remoteFileSize != 0 && tempFileSize >= remoteFileSize) {
 					if (tempFile.renameTo(file)) {
 						sendMessage(tempFileSize, remoteFileSize);
 					}
 					return;
 				}
+				File parentFile = tempFile.getParentFile();
+				if ((parentFile.mkdirs() || parentFile.isDirectory()) && !tempFile.exists()) {
+					//noinspection ResultOfMethodCallIgnored
+					tempFile.createNewFile();
+				}
 
-				url = new URL(downloadBean.downloadUrl);
+				URL url = new URL(downloadBean.downloadUrl);
 				httpURLConnection = (HttpURLConnection) url.openConnection();
+
 				// 设置User-Agent
 				httpURLConnection.setRequestProperty("User-Agent", "Net");
 				// 设置续传开始
 				httpURLConnection.setRequestProperty("Range", "bytes=" + tempFileSize + "-");
 				// 获取输入流
 				bis = new BufferedInputStream(httpURLConnection.getInputStream());
-				rndFile = new RandomAccessFile(downloadBean.filePath + "\\" + downloadBean.fileName + ".tmp", "rw");
+
+				// 检查本地文件
+				RandomAccessFile rndFile = new RandomAccessFile(downloadBean.filePath + "/" + downloadBean.fileName + ".tmp", "rw");
 				rndFile.seek(tempFileSize);
 				int i = 0;
 				int size;
@@ -192,7 +191,7 @@ public class DownloadHelper {
 					}
 				}
 				httpURLConnection.disconnect();
-				if (downloadFileSize + tempFileSize == remoteFileSize) {
+				if (downloadFileSize + tempFileSize >= remoteFileSize) {
 					sendMessage(remoteFileSize, remoteFileSize);
 					if (tempFile.renameTo(file)) {
 						//noinspection ResultOfMethodCallIgnored
@@ -205,7 +204,7 @@ public class DownloadHelper {
 					context.registerReceiver(receiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
 				}
 			}
-
+			downloadThread = null;
 		}
 
 		private long getRemoteFileSize(String url) {
@@ -219,6 +218,7 @@ public class DownloadHelper {
 			}
 			return size;
 		}
+
 
 		private void sendMessage(long current, long fileSize) {
 			Message msg = handler.obtainMessage(0, DownloadHelper.this);
@@ -238,7 +238,10 @@ public class DownloadHelper {
 				case NONE: // 无网络
 					break;
 				case WIFI:// wifi
-					context.unregisterReceiver(this);
+					try {
+						context.unregisterReceiver(this);
+					} catch (Exception ignored) {
+					}
 					start();
 					break;
 				default:// 手机网络
