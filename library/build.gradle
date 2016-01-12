@@ -8,8 +8,8 @@ android {
     defaultConfig {
         minSdkVersion 10
         targetSdkVersion 22
-        versionCode 20151228
-        versionName "1.1.6"
+        versionCode 1
+        versionName "1.0"
     }
     buildTypes {
         release {
@@ -31,7 +31,7 @@ dependencies {
 ext {
     PUBLISH_GROUP_ID = 'luki.x'
     PUBLISH_ARTIFACT_ID = 'xparser'
-    PUBLISH_VERSION = android.defaultConfig.versionName
+    PUBLISH_VERSION =  getProperty('xparser.version');
 }
 
 uploadArchives {

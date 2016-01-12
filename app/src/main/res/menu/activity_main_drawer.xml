@@ -5,7 +5,7 @@
         <item android:id="@+id/nav_camara" android:icon="@android:drawable/ic_menu_camera" android:title="Import" />
         <item android:id="@+id/x_parser_adapter" android:icon="@android:drawable/ic_menu_gallery" android:title="ParserAdapter" />
         <item android:id="@+id/x_parser_db" android:icon="@android:drawable/ic_menu_slideshow" android:title="ParserDBHelper" />
-        <item android:id="@+id/nav_manage" android:icon="@android:drawable/ic_menu_manage" android:title="Tools" />
+        <item android:id="@+id/nav_download" android:icon="@android:drawable/ic_menu_manage" android:title="Download" />
     </group>
 
     <item android:title="Communicate">
