@@ -16,6 +16,7 @@
 
 package luki.x.base;
 
+import java.util.List;
 import java.util.Map;
 
 import luki.x.task.TaskConfig;
@@ -38,7 +39,7 @@ public interface INetEngine {
 	 * @return respond String
 	 * @throws Exception
 	 */
-	String post(String url, Map<String, String> params, Map<String, String> headers) throws Exception;
+	String post(String url, Map<String, String> params, Map<String, String> headers, List<Object> dataList) throws Exception;
 
 	/**
 	 * GET 

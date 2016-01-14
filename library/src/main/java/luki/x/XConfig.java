@@ -70,7 +70,7 @@ public class XConfig {
 		private Map<String, String> requestHeaders;
 		private Map<String, String> requestExtras;
 		private Context context;
-		private boolean writeLogs;
+		private boolean writeLogs = BuildConfig.DEBUG;
 		private Type errorType;
 		private boolean cacheInDB = true;
 		private IParser userParser;

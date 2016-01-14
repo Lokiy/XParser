@@ -76,7 +76,7 @@ public class TaskEngine<T extends Serializable> extends AsyncTask<TaskParams<T>,
 							break;
 						case POST:
 						default:
-							resultString = mNetUtils.post(httpUrl, requestParams, mParams.getHeaders());
+							resultString = mNetUtils.post(httpUrl, requestParams, mParams.getHeaders(), mParams.getDataList());
 								break;
 					}
 					log(resultString, millis);
@@ -85,7 +85,6 @@ public class TaskEngine<T extends Serializable> extends AsyncTask<TaskParams<T>,
 					result.status = ResultStatus.ERROR;
 					result.e = e;
 					log(e.toString(), millis);
-//					XLog.e(TAG, e.toString());
 				}
 				if (result.status == ResultStatus.SUCCESS && mParams.isAllowLoadCache) {
 					if (!config.cacheInDB) {

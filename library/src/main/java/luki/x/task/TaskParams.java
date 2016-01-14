@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,6 +17,7 @@ package luki.x.task;
 
 import java.lang.reflect.Type;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import luki.x.util.NetUtils.Method;
@@ -24,7 +25,7 @@ import luki.x.util.NetUtils.Method;
 /**
  * The basic parameters of the task request<BR>
  * used {@link Builder} to create TaskParams
- * 
+ *
  * @author Luki
  */
 public final class TaskParams<T> {
@@ -34,8 +35,9 @@ public final class TaskParams<T> {
 	TaskCallBack<AsyncResult<T>> listener;
 	Type type;
 	Method method = Method.POST;
-	Map<String, String> params;
 	Map<String, String> headers;
+	Map<String, String> params;
+	List<Object> dataList;
 	boolean isForceRefresh;
 	boolean isAllowLoadCache = true;
 	boolean isParse = true;
@@ -56,7 +58,8 @@ public final class TaskParams<T> {
 	}
 
 	private void addMap(Map<String, String> a, Map<String, String> b) {
-		if (a == null) return;
+		if (a == null)
+			return;
 		for (String key : a.keySet())
 			b.put(key, a.get(key));
 	}
@@ -107,23 +110,27 @@ public final class TaskParams<T> {
 	/**
 	 * @return the headers
 	 */
-	public final Map<String, String> getHeaders() {
+	final Map<String, String> getHeaders() {
 		return headers;
 	}
 
-	/*public*/final void setTaskConfig(TaskConfig taskTConfig) {
+	/*public*/
+	final void setTaskConfig(TaskConfig taskTConfig) {
 		this.taskConfig = taskTConfig;
 	}
 
 	@Override
 	public final String toString() {
-		return "Params [url=" + url + ", isAllowLoadCache=" + isAllowLoadCache + ", type=" + type + ", isParse=" + isParse + ", method="
-				+ method + ", params=" + params + "]";
+		return "Params [url=" + url + ", isAllowLoadCache=" + isAllowLoadCache + ", type=" + type + ", isParse=" + isParse + ", method=" + method + ", params=" + params + "]";
+	}
+
+	final List<Object> getDataList() {
+		return dataList;
 	}
 
 	/**
 	 * Builder
-	 * 
+	 *
 	 * @author Luki
 	 * @param <T>
 	 */
@@ -132,6 +139,7 @@ public final class TaskParams<T> {
 		private boolean isParallel;
 		private Map<String, String> headers;
 		private Map<String, String> params;
+		private List<Object> dataList;
 		private boolean isAllowLoadCache = true;
 		private boolean isForceRefresh;
 		private long cacheTime = 60 * 60 * 1000;
@@ -147,7 +155,7 @@ public final class TaskParams<T> {
 
 		/**
 		 * Task back listener.
-		 * 
+		 *
 		 * @return Builder<T>
 		 */
 		public Builder<T> listener(TaskCallBack<AsyncResult<T>> listener) {
@@ -157,7 +165,7 @@ public final class TaskParams<T> {
 
 		/**
 		 * default post
-		 * 
+		 *
 		 * @param method method
 		 * @return Builder<T>
 		 */
@@ -168,7 +176,7 @@ public final class TaskParams<T> {
 
 		/**
 		 * default parse
-		 * 
+		 *
 		 * @param isParse isParse
 		 * @return Builder<T>
 		 */
@@ -179,7 +187,7 @@ public final class TaskParams<T> {
 
 		/**
 		 * parse type
-		 * 
+		 *
 		 * @param type tye
 		 * @return Builder<T>
 		 */
@@ -190,7 +198,7 @@ public final class TaskParams<T> {
 
 		/**
 		 * cache time. Default 1 hour.
-		 * 
+		 *
 		 * @param cacheTime cacheTime
 		 * @return Builder<T>
 		 */
@@ -201,7 +209,7 @@ public final class TaskParams<T> {
 
 		/**
 		 * set force refresh enable.
-		 * 
+		 *
 		 * @param forceRefresh forceRefresh
 		 * @return Builder<T>
 		 */
@@ -212,7 +220,7 @@ public final class TaskParams<T> {
 
 		/**
 		 * disable load cache.
-		 * 
+		 *
 		 * @return Builder<T>
 		 */
 		public Builder<T> disAllowLoadCache() {
@@ -222,7 +230,7 @@ public final class TaskParams<T> {
 
 		/**
 		 * parameter
-		 * 
+		 *
 		 * @param params params
 		 * @return Builder<T>
 		 */
@@ -245,7 +253,7 @@ public final class TaskParams<T> {
 
 		/**
 		 * tasks is parallel
-		 * 
+		 *
 		 * @return Builder<T>
 		 */
 		public Builder<T> parallel(boolean isParallel) {
@@ -258,9 +266,14 @@ public final class TaskParams<T> {
 			return this;
 		}
 
+		public Builder<T> setDataList(List<Object> dataList) {
+			this.dataList = dataList;
+			return this;
+		}
+
 		/**
 		 * build
-		 * 
+		 *
 		 * @return Builder<T>
 		 */
 		public TaskParams<T> build() {
@@ -277,6 +290,7 @@ public final class TaskParams<T> {
 			params.isParse = isParse;
 			params.listener = listener;
 			params.params = this.params;
+			params.dataList = dataList;
 			params.method = method;
 			params.type = type;
 			return params;

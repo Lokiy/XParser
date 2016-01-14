@@ -16,6 +16,7 @@
 package luki.x.util;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 
 import luki.x.base.INetEngine;
@@ -52,8 +53,8 @@ public enum NetUtils {
 	 * @throws IOException
 	 */
 
-	public String post(String url, Map<String, String> params, Map<String, String> headers) throws Exception {
-		return mNetEngine.post(url, params, headers);
+	public String post(String url, Map<String, String> params, Map<String, String> headers, List<Object> dataList) throws Exception {
+		return mNetEngine.post(url, params, headers, dataList);
 	}
 
 	public INetEngine getNetEngine() {
