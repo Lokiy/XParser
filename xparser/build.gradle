@@ -1,0 +1,54 @@
+apply plugin: 'com.android.library'
+
+android {
+    compileSdkVersion 22
+    buildToolsVersion "23.0.1"
+
+    defaultConfig {
+        minSdkVersion 10
+        targetSdkVersion 22
+        versionCode 1
+        versionName "1.0"
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+    packagingOptions {
+        exclude 'META-INF/DEPENDENCIES'
+    }
+}
+
+dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile 'com.google.code.gson:gson:2.4'
+}
+
+ext {
+    bintrayRepo = 'maven'
+    bintrayName = 'xparser'
+
+    publishedGroupId = 'com.com.lokiy.xparser'
+    libraryName = 'xparser'
+    artifact = 'xparser'
+
+    libraryDescription = 'An ORM for Android'
+
+    siteUrl = 'https://github.com/Lokiy/XParser'
+    gitUrl = 'https://github.com/Lokiy/XParser.git'
+
+    libraryVersion = getProperty('xparser.version');
+
+    developerId = 'Lokiy'
+    developerName = 'Lokiy Liu'
+    developerEmail = 'liulongke@gmail.com'
+
+    licenseName = 'The Apache Software License, Version 2.0'
+    licenseUrl = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+    allLicenses = ["Apache-2.0"]
+}
+
+apply from: 'https://raw.githubusercontent.com/nuuneoi/JCenter/master/installv1.gradle'
+apply from: 'https://raw.githubusercontent.com/nuuneoi/JCenter/master/bintrayv1.gradle'

@@ -29,7 +29,7 @@ import android.text.TextPaint;
 import android.util.AttributeSet;
 import android.widget.ProgressBar;
 
-import luki.x.sample.R;
+import com.lokiy.x.sample.R;
 
 /**
  * An enhanced version of the ProgressBar which provides greater control over
