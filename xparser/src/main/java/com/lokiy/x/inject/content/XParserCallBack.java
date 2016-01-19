@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lokiy.x.base;
+package com.lokiy.x.inject.content;
 
 import android.view.View;
 
@@ -27,8 +27,8 @@ public interface XParserCallBack extends ParserCallBack {
 	/**
 	 * When the tag is Ignore, it will be invoked.
 	 * 
-	 * @param key
-	 * @param v
+	 * @param key content description of view
+	 * @param v view
 	 */
 	void ignoreView(String key, View v);
 }

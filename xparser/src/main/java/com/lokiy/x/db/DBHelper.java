@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package com.lokiy.x.base;
+package com.lokiy.x.db;
+
+import com.lokiy.x.db.DBSelection;
 
 import java.io.Closeable;
 import java.io.Serializable;
 import java.util.List;
-
-import com.lokiy.x.db.DBSelection;
 
 /**
  * DBHelper who can convenient and unified to manage the data.<BR>
@@ -36,7 +36,7 @@ import com.lokiy.x.db.DBSelection;
  *
  * @author Luki
  */
-public interface IDBHelper extends Closeable {
+public interface DBHelper extends Closeable {
 
 	String TAG = "DBHelper";
 

@@ -29,15 +29,13 @@ import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.ListView;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.lokiy.x.XParser;
-import com.lokiy.x.base.IXAdapter;
-import com.lokiy.x.base.ParserCallBack;
 import com.lokiy.x.util.InjectUtils;
 import com.lokiy.x.util.WidgetUtils;
 import com.lokiy.x.util.WidgetUtils.ResType;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static com.lokiy.x.XConfig.SCREEN_WIDTH;
 
@@ -53,7 +51,7 @@ import static com.lokiy.x.XConfig.SCREEN_WIDTH;
  * @author Luki
  * @param <T>
  */
-public class InjectAdapter<T> extends BaseAdapter implements IXAdapter<T> {
+public class InjectAdapter<T> extends BaseAdapter implements XAdapter<T> {
 	/** first page index default = 1 */
 	protected static int FIRST_PAGE = 1;
 	protected String TAG = InjectAdapter.class.getSimpleName();

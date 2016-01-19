@@ -14,20 +14,20 @@
  * limitations under the License.
  */
 
-package com.lokiy.x.base;
+package com.lokiy.x.net;
+
+import com.lokiy.x.task.TaskConfig;
 
 import java.util.List;
 import java.util.Map;
 
-import com.lokiy.x.task.TaskConfig;
-
 /**
- *
+ * which does post/get method and return the response string.
  *
  * @author Luki
  *
  */
-public interface INetEngine {
+public interface RequestHandler {
 
 	/**
 	 * POST 

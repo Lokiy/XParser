@@ -19,26 +19,26 @@ package com.lokiy.x;
 import android.app.Activity;
 import android.view.View;
 
-import java.io.Serializable;
-
-import com.lokiy.x.base.AsyncTask;
-import com.lokiy.x.base.IDBHelper;
-import com.lokiy.x.base.IParser;
-import com.lokiy.x.base.ParserCallBack;
-import com.lokiy.x.base.XLog;
+import com.lokiy.x.task.base.AsyncTask;
+import com.lokiy.x.db.DBHelper;
 import com.lokiy.x.db.DBEntryMap;
+import com.lokiy.x.inject.content.IParser;
 import com.lokiy.x.inject.content.InjectHolder;
 import com.lokiy.x.inject.content.InjectParser;
+import com.lokiy.x.inject.content.ParserCallBack;
 import com.lokiy.x.task.TaskConfig;
+import com.lokiy.x.task.TaskEngine;
 import com.lokiy.x.task.TaskStatusListener;
 import com.lokiy.x.util.ReflectUtils;
+
+import java.io.Serializable;
 
 import static com.lokiy.x.inject.view.InjectEventControl.initListener;
 import static com.lokiy.x.inject.view.InjectEventControl.initView;
 import static com.lokiy.x.inject.view.InjectEventControl.parseWithCDAnnotation;
 
 /**
- * A easy tool to do something with init {@link View} or set data to View, and get a {@link IDBHelper} to operate the
+ * A easy tool to do something with init {@link View} or set data to View, and get a {@link DBHelper} to operate the
  * DB, and do {@link AsyncTask} with {@link XTask}.
  * 
  * @author Luki
@@ -239,7 +239,7 @@ public enum XParser {
 				e.printStackTrace();
 			}
 		}
-		return new XTask<>(callBack, config);
+		return new TaskEngine<>(callBack, config);
 	}
 
 	/**
@@ -255,28 +255,28 @@ public enum XParser {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		return new XTask<>(callBack, config);
+		return new TaskEngine<>(callBack, config);
 	}
 
 	/**
-	 * returns a IDBHelper object who can convenient and unified to manage the data.
+	 * returns a DBHelper object who can convenient and unified to manage the data.
 	 * 
-	 * @return IDBHelper
-	 * @see IDBHelper
+	 * @return DBHelper
+	 * @see DBHelper
 	 */
-	public IDBHelper getDBHelper() {
+	public DBHelper getDBHelper() {
 		return getDBHelper(null);
 	}
 
 	/**
 	 * When the database does not exist, it will automatically generate a database according to the database name.
-	 * And returns a IDBHelper object who can convenient and unified to manage the data.
+	 * And returns a DBHelper object who can convenient and unified to manage the data.
 	 * 
 	 * @param dbName dbName
-	 * @return IDBHelper
-	 * @see IDBHelper
+	 * @return DBHelper
+	 * @see DBHelper
 	 */
-	public IDBHelper getDBHelper(String dbName) {
+	public DBHelper getDBHelper(String dbName) {
 		checkConfiguration();
 		return DBEntryMap.getDBHelper(XConfig.sContext, dbName);
 	}

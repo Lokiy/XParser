@@ -15,12 +15,11 @@
  */
 package com.lokiy.x.db;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import com.lokiy.x.base.IDBHelper;
 import android.content.Context;
 import android.text.TextUtils;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Database entry map.
@@ -29,7 +28,7 @@ import android.text.TextUtils;
  */
 public class DBEntryMap {
 
-	private static Map<String, IDBHelper> helperMap = new HashMap<>();
+	private static Map<String, DBHelper> helperMap = new HashMap<>();
 	private static final String DEFAULT_DATABASE_NAME = "xdb";
 
 	/**
@@ -39,11 +38,11 @@ public class DBEntryMap {
 	 * @param dbName dbName
 	 * @return DBHelper
 	 */
-	public static IDBHelper getDBHelper(Context context, String dbName) {
+	public static DBHelper getDBHelper(Context context, String dbName) {
 		if (TextUtils.isEmpty(dbName) || TextUtils.isEmpty(dbName.trim())) {
 			dbName = DEFAULT_DATABASE_NAME;
 		}
-		IDBHelper dbHelper;
+		DBHelper dbHelper;
 		if ((dbHelper = helperMap.get(dbName)) == null) {
 			synchronized (DBEntryMap.class) {
 				if (helperMap.get(dbName) == null) {
@@ -61,7 +60,7 @@ public class DBEntryMap {
 	 * @param dbName dbName
 	 */
 	public static void destroy(String dbName) {
-		IDBHelper dbHelper = helperMap.remove(dbName);
+		DBHelper dbHelper = helperMap.remove(dbName);
 		if (dbHelper != null && dbHelper.isOpen()) {
 			dbHelper.close();
 		}

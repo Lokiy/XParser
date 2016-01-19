@@ -1,4 +1,8 @@
-package com.lokiy.x.base;
+package com.lokiy.x.task.base;
+
+import android.os.Handler;
+import android.os.Message;
+import android.os.Process;
 
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
@@ -14,10 +18,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
-
-import android.os.Handler;
-import android.os.Message;
-import android.os.Process;
 
 /**
  * https://android.googlesource.com/platform/frameworks/base/+/jb-release/core/java/android/os/AsyncTask.java

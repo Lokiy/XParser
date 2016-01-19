@@ -15,15 +15,16 @@
  */
 package com.lokiy.x.util;
 
+import android.content.Context;
+import android.widget.AdapterView;
+import android.widget.ListView;
+
+import com.lokiy.x.XLog;
+
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
-
-import com.lokiy.x.base.XLog;
-import android.content.Context;
-import android.widget.AdapterView;
-import android.widget.ListView;
 
 /**
  * @author Luki

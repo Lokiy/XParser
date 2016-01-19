@@ -15,11 +15,11 @@
  */
 package com.lokiy.x.util;
 
-import java.util.Locale;
-
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+
+import java.util.Locale;
 
 /**
  *

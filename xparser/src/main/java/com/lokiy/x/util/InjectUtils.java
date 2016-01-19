@@ -17,13 +17,13 @@ package com.lokiy.x.util;
 
 import android.view.View;
 
+import com.lokiy.x.XParser;
+import com.lokiy.x.XLog;
+import com.lokiy.x.inject.content.IParser;
+import com.lokiy.x.inject.content.ParseHolder;
+
 import java.util.List;
 import java.util.Map;
-
-import com.lokiy.x.XParser;
-import com.lokiy.x.base.IParser;
-import com.lokiy.x.base.XLog;
-import com.lokiy.x.inject.content.ParseHolder;
 
 /**
  * @author Luki

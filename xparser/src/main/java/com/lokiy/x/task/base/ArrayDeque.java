@@ -3,7 +3,7 @@
  * as explained at http://creativecommons.org/licenses/publicdomain.
  */
 
-package com.lokiy.x.base;
+package com.lokiy.x.task.base;
 
 // BEGIN android-note
 // removed link to collections framework docs

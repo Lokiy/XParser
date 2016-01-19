@@ -29,7 +29,7 @@ import javax.crypto.spec.DESKeySpec;
  */
 public class DESUtil {
 
-	private final static String DEFALULT_KEY = "lukixdes";
+	private final static String DEFAULT_KEY = "lukixdes";
 
 	public static void main(String[] args) throws Exception {
 
@@ -52,7 +52,7 @@ public class DESUtil {
 		if (data == null)
 			return null;
 		if (key == null || key.length() < 8) {
-			key += DEFALULT_KEY;
+			key += DEFAULT_KEY;
 		}
 		return new String(Base64.encode(encrypt(data.getBytes(), key.getBytes()), 0));
 	}
@@ -69,7 +69,7 @@ public class DESUtil {
 		if (data == null)
 			return null;
 		if (key == null || key.length() < 8) {
-			key += DEFALULT_KEY;
+			key += DEFAULT_KEY;
 		}
 		return new String(decrypt(Base64.decode(data, 0), key.getBytes()));
 	}
@@ -88,11 +88,11 @@ public class DESUtil {
 		DESKeySpec dks = new DESKeySpec(key);
 
 		SecretKeyFactory keyFactory = SecretKeyFactory.getInstance("DES");
-		SecretKey securekey = keyFactory.generateSecret(dks);
+		SecretKey secretkey = keyFactory.generateSecret(dks);
 
 		Cipher cipher = Cipher.getInstance("DES");
 
-		cipher.init(Cipher.ENCRYPT_MODE, securekey, sr);
+		cipher.init(Cipher.ENCRYPT_MODE, secretkey, sr);
 
 		return cipher.doFinal(data);
 	}
@@ -111,11 +111,11 @@ public class DESUtil {
 		DESKeySpec dks = new DESKeySpec(key);
 
 		SecretKeyFactory keyFactory = SecretKeyFactory.getInstance("DES");
-		SecretKey securekey = keyFactory.generateSecret(dks);
+		SecretKey secretkey = keyFactory.generateSecret(dks);
 
 		Cipher cipher = Cipher.getInstance("DES");
 
-		cipher.init(Cipher.DECRYPT_MODE, securekey, sr);
+		cipher.init(Cipher.DECRYPT_MODE, secretkey, sr);
 
 		return cipher.doFinal(data);
 	}

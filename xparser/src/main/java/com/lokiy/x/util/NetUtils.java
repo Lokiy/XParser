@@ -15,12 +15,12 @@
  */
 package com.lokiy.x.util;
 
+import com.lokiy.x.net.RequestHandler;
+import com.lokiy.x.net.XNetEngine;
+
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
-
-import com.lokiy.x.base.INetEngine;
-import com.lokiy.x.net.XNetEngine;
 
 /**
  * 关于网络请求数据
@@ -30,7 +30,7 @@ import com.lokiy.x.net.XNetEngine;
 public enum NetUtils {
 	INSTANCE;
 
-	private INetEngine mNetEngine = new XNetEngine();
+	private RequestHandler mNetEngine = new XNetEngine();
 
 	/**
 	 * GET 请求数据
@@ -57,11 +57,11 @@ public enum NetUtils {
 		return mNetEngine.post(url, params, headers, dataList);
 	}
 
-	public INetEngine getNetEngine() {
+	public RequestHandler getNetEngine() {
 		return mNetEngine;
 	}
 
-	public void setNetEngine(INetEngine engine) {
+	public void setNetEngine(RequestHandler engine) {
 		mNetEngine = engine;
 	}
 

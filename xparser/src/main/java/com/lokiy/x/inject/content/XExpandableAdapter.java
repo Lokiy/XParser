@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lokiy.x.base;
+package com.lokiy.x.inject.content;
 
 import java.util.List;
 
@@ -24,6 +24,6 @@ import java.util.List;
  * @version 1 Nov 11, 2014 8:52:24 PM 
  * @since 1.0
  */
-public interface IXExpandableAdapter<Child> {
+public interface XExpandableAdapter<Child> {
 	List<Child> getChild();
 }

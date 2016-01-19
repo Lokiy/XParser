@@ -19,8 +19,6 @@ import java.io.Serializable;
 import java.lang.reflect.Type;
 import java.util.Map;
 
-import com.lokiy.x.base.IDataParser;
-
 /**
  * Task Configuration
  * 
@@ -40,7 +38,7 @@ public final class TaskConfig  implements Serializable{
 	public Map<String, String> requestExtras;
 	/** It' will be used this analysis when parsing failed */
 	public Type errorType;
-	public IDataParser dataParser;
+	public DataParser dataParser;
 	/**
 	 * True, cache in the inside of the DB but efficiency low. False, cache in the inside of the File but efficiency
 	 * high
@@ -50,5 +48,5 @@ public final class TaskConfig  implements Serializable{
 	public int timeOut;
 	/** set up task retry times */
 	public int retryTimes;
-	/*public*/ boolean isDefault;
+	public boolean isDefault;
 }

@@ -16,9 +16,6 @@
 
 package com.lokiy.x;
 
-import static com.lokiy.x.inject.view.InjectEventControl.linkedToMethod;
-import com.lokiy.x.base.XLog;
-import com.lokiy.x.inject.view.annotation.ListenerInject.ListenerType;
 import android.app.Activity;
 import android.graphics.drawable.Drawable;
 import android.view.View;
@@ -29,6 +26,10 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import com.lokiy.x.inject.view.annotation.ListenerInject.ListenerType;
+
+import static com.lokiy.x.inject.view.InjectEventControl.linkedToMethod;
 
 /**
  * @author Luki

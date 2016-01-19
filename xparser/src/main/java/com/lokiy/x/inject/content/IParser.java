@@ -13,11 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lokiy.x.base;
+package com.lokiy.x.inject.content;
 
-import com.lokiy.x.inject.content.InjectAdapter;
-import com.lokiy.x.inject.content.InjectHolder;
-import com.lokiy.x.inject.content.ParseHolder;
 import android.view.View;
 import android.widget.ListAdapter;
 

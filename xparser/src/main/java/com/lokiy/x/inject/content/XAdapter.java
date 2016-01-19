@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lokiy.x.base;
+package com.lokiy.x.inject.content;
 
 import android.widget.Adapter;
 
@@ -25,7 +25,7 @@ import java.util.List;
  * @author Luki
  * @param <T>
  */
-public interface IXAdapter<T> extends Adapter {
+public interface XAdapter<T> extends Adapter {
 
 	/**
 	 * replace the index of data and refresh Adapter

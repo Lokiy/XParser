@@ -25,6 +25,9 @@ import android.os.Handler;
 import android.os.Message;
 import android.text.TextUtils;
 
+import com.lokiy.x.XConfig;
+import com.lokiy.x.util.NetStatusUtils.NetType;
+
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.RandomAccessFile;
@@ -33,9 +36,6 @@ import java.net.HttpURLConnection;
 import java.net.SocketException;
 import java.net.URL;
 import java.net.UnknownHostException;
-
-import com.lokiy.x.XConfig;
-import com.lokiy.x.util.NetStatusUtils.NetType;
 
 @SuppressWarnings("unused")
 public class DownloadHelper {
@@ -90,7 +90,17 @@ public class DownloadHelper {
 	}
 
 	public interface OnDownloadProgressUpgradeListener {
+		/**
+		 * when the download progress upgrade, it will be invoked.
+		 * @param current current size
+		 * @param maxSize maximum size
+		 */
 		void onDownloadProgressUpgrade(long current, long maxSize);
+
+		/**
+		 * when download failed, it will be invoked.
+		 */
+		void onDownloadFailed();
 	}
 
 	public static class DownloadBean {
@@ -109,22 +119,28 @@ public class DownloadHelper {
 			DownloadHelper task = (DownloadHelper) msg.obj;
 			long current = msg.getData().getLong(EXTRA_CURRENT);
 			long maxSize = msg.getData().getLong(EXTRA_MAX_SIZE);
-			if (current > maxSize) {
-				current = maxSize;
-			}
-			if (task.listener != null) {
-				if (current == maxSize) {
-					Intent intent = new Intent();
-					intent.setAction(ACTION_FINISH);
-					task.context.sendBroadcast(intent);
+			if (current < 0) {
+				if (task.listener != null) {
+					task.listener.onDownloadFailed();
 				}
-				task.listener.onDownloadProgressUpgrade(current, maxSize);
+			} else {
+				if (current > maxSize) {
+					current = maxSize;
+				}
+				if (task.listener != null) {
+					if (current == maxSize) {
+						Intent intent = new Intent();
+						intent.setAction(ACTION_FINISH);
+						task.context.sendBroadcast(intent);
+					}
+					task.listener.onDownloadProgressUpgrade(current, maxSize);
+				}
+				Intent intent = new Intent();
+				intent.setAction(ACTION_CHANGE);
+				intent.putExtra(EXTRA_CURRENT, current);
+				intent.putExtra(EXTRA_MAX_SIZE, maxSize);
+				task.context.sendBroadcast(intent);
 			}
-			Intent intent = new Intent();
-			intent.setAction(ACTION_CHANGE);
-			intent.putExtra(EXTRA_CURRENT, current);
-			intent.putExtra(EXTRA_MAX_SIZE, maxSize);
-			task.context.sendBroadcast(intent);
 		}
 
 	}
@@ -133,7 +149,6 @@ public class DownloadHelper {
 
 		@SuppressWarnings("deprecation")
 		public void run() {
-
 			HttpURLConnection httpURLConnection;
 			BufferedInputStream bis;
 			try {
@@ -141,11 +156,15 @@ public class DownloadHelper {
 				long remoteFileSize = getRemoteFileSize(downloadBean.downloadUrl);
 
 				File file = new File(downloadBean.filePath + "/" + downloadBean.fileName);
+				File tempFile = new File(downloadBean.filePath + "/" + downloadBean.fileName + ".tmp");
 				if (remoteFileSize != 0 && file.exists() && file.length() >= remoteFileSize) {
+					if (tempFile.exists()) {//delete temp file
+						//noinspection ResultOfMethodCallIgnored
+						tempFile.delete();
+					}
 					sendMessage(remoteFileSize, remoteFileSize);
 					return;
 				}
-				File tempFile = new File(downloadBean.filePath + "/" + downloadBean.fileName + ".tmp");
 				long tempFileSize = tempFile.length();
 				if (remoteFileSize != 0 && tempFileSize >= remoteFileSize) {
 					if (tempFile.renameTo(file)) {
@@ -183,16 +202,18 @@ public class DownloadHelper {
 				}
 				httpURLConnection.disconnect();
 				if (downloadFileSize + tempFileSize >= remoteFileSize) {
-					sendMessage(remoteFileSize, remoteFileSize);
 					if (tempFile.renameTo(file)) {
 						//noinspection ResultOfMethodCallIgnored
 						tempFile.delete();
 					}
+					sendMessage(remoteFileSize, remoteFileSize);
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
 				if (e instanceof UnknownHostException || e instanceof ConnectException || e instanceof SocketException) {
 					context.registerReceiver(receiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
+				} else {
+					sendMessage(-1, 100);
 				}
 			}
 			downloadThread = null;
@@ -231,9 +252,9 @@ public class DownloadHelper {
 				case WIFI:// wifi
 					try {
 						context.unregisterReceiver(this);
+						start();
 					} catch (Exception ignored) {
 					}
-					start();
 					break;
 				default://
 					break;

@@ -4,7 +4,7 @@
  * at http://creativecommons.org/licenses/publicdomain
  */
 
-package com.lokiy.x.base;
+package com.lokiy.x.task.base;
 
 import java.util.Collection;
 import java.util.Iterator;

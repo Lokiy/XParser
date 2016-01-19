@@ -15,9 +15,7 @@
  */
 package com.lokiy.x.simple;
 
-import java.io.Serializable;
-import java.lang.reflect.Type;
-import java.util.Map;
+import android.util.Log;
 
 import com.lokiy.x.XParser;
 import com.lokiy.x.XTask;
@@ -27,7 +25,10 @@ import com.lokiy.x.task.AsyncResult.ResultStatus;
 import com.lokiy.x.task.TaskCallBack;
 import com.lokiy.x.task.TaskParams;
 import com.lokiy.x.task.TaskStatusListener;
-import android.util.Log;
+
+import java.io.Serializable;
+import java.lang.reflect.Type;
+import java.util.Map;
 
 /**
  * Universal asynchronous task paradigm

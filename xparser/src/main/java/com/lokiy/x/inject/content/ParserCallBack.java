@@ -13,9 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lokiy.x.base;
+package com.lokiy.x.inject.content;
 
-import com.lokiy.x.inject.content.InjectHolder;
 import android.view.View;
 
 
@@ -27,13 +26,13 @@ import android.view.View;
 public interface ParserCallBack {
 	/**
 	 * if the view failed to parse,the method will be invoked.
-	 * @param key
-	 * @param v
+	 * @param key content description of view
+	 * @param v view
 	 */
 	void failedInjectView(String key, View v);
 	/**
 	 * when all the views be parsed, the method will be invoked.
-	 * @param holder
+	 * @param holder holder
 	 */
 	void configViews(InjectHolder holder);
 }

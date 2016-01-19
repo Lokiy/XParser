@@ -19,22 +19,16 @@ import android.text.Html;
 import android.text.TextUtils;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import com.lokiy.x.XLog;
+import com.lokiy.x.util.InjectUtils;
+import com.lokiy.x.util.ReflectUtils;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
-
-import com.lokiy.x.base.IAdapterView;
-import com.lokiy.x.base.IParser;
-import com.lokiy.x.base.ParserCallBack;
-import com.lokiy.x.base.XImage;
-import com.lokiy.x.base.XLog;
-import com.lokiy.x.base.XParserCallBack;
-import com.lokiy.x.util.InjectUtils;
-import com.lokiy.x.util.ReflectUtils;
 
 /**
  * Default Parser
@@ -132,7 +126,7 @@ public class InjectParser implements IParser {
 				((ImageView) v).setImageResource(id);
 			}
 			XLog.d(TAG, "attach : View -> ImageView");
-		} else if (v instanceof IAdapterView || v instanceof AdapterView) {
+		} else if (v instanceof AdapterView || v instanceof android.widget.AdapterView) {
 			try {
 				InjectAdapter ada = (InjectAdapter) ReflectUtils.getClassInstance(ph.adapter);
 				if (value instanceof Object[]) {
@@ -141,10 +135,10 @@ public class InjectParser implements IParser {
 				if (value instanceof List) {
 					ada.addAll((List) value);
 				}
-				if (v instanceof IAdapterView) {
-					((IAdapterView) v).setAdapter(ada);
-				} else {
+				if (v instanceof AdapterView) {
 					((AdapterView) v).setAdapter(ada);
+				} else {
+					((android.widget.AdapterView) v).setAdapter(ada);
 				}
 				XLog.d(TAG, "attach : View -> AdapterView");
 			} catch (Exception e) {

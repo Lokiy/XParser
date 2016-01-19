@@ -15,10 +15,10 @@
  */
 package com.lokiy.x.task;
 
-import java.io.Serializable;
-
 import com.lokiy.x.db.annotation.Encrypt;
 import com.lokiy.x.db.annotation.Unique;
+
+import java.io.Serializable;
 
 public class TaskResult implements Serializable {
 

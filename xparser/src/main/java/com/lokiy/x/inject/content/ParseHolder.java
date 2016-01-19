@@ -15,11 +15,11 @@
  */
 package com.lokiy.x.inject.content;
 
+import com.lokiy.x.XLog;
+import com.lokiy.x.util.ReflectUtils;
+
 import java.io.Serializable;
 import java.lang.reflect.Field;
-
-import com.lokiy.x.base.XLog;
-import com.lokiy.x.util.ReflectUtils;
 
 /**
  * @author Luki

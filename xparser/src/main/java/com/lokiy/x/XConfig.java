@@ -19,24 +19,23 @@ package com.lokiy.x;
 import android.content.Context;
 import android.view.WindowManager;
 
-import java.lang.reflect.Type;
-import java.util.Map;
-
-import com.lokiy.x.base.IDataParser;
-import com.lokiy.x.base.INetEngine;
-import com.lokiy.x.base.IParser;
-import com.lokiy.x.base.XLog;
+import com.lokiy.x.inject.content.IParser;
 import com.lokiy.x.inject.content.InjectParser;
+import com.lokiy.x.net.RequestHandler;
+import com.lokiy.x.task.DataParser;
 import com.lokiy.x.util.CacheUtil;
 import com.lokiy.x.util.NetStatusUtils;
+
+import java.lang.reflect.Type;
+import java.util.Map;
 
 /**
  * Presents configuration for {@link XParser}
  * 
  * @author Luki
  * @see XParser
- * @see com.lokiy.x.base.IParser
- * @see com.lokiy.x.base.INetEngine
+ * @see IParser
+ * @see RequestHandler
  * @since 1.1.1
  */
 @SuppressWarnings("deprecation")
@@ -51,11 +50,11 @@ public class XConfig {
 	Map<String, String> requestHeaders;
 	Type errorType;
 	IParser userParser;
-	INetEngine netEngine;
+	RequestHandler netEngine;
 	boolean cacheInDB;
 	int timeout;
 	int times;
-	IDataParser dataParser;
+	DataParser dataParser;
 	boolean enableDefaultParserLogging;
 
 	/**
@@ -73,10 +72,10 @@ public class XConfig {
 		private Type errorType;
 		private boolean cacheInDB = true;
 		private IParser userParser;
-		private INetEngine netEngine;
+		private RequestHandler netEngine;
 		private int timeout = 15 * 1000;
 		private int times = 1;
-		private IDataParser dataParser;
+		private DataParser dataParser;
 		private boolean enabledDefaultParserLogging;
 
 		public Builder(Context context) {
@@ -85,7 +84,7 @@ public class XConfig {
 
 		/**
 		 * Enables detail logging of {@link XParser} work. To prevent detail logs don't call this method.
-		 * Consider {@link com.lokiy.x.base.XLog#disableLogging()} to disable XParser logging completely (even error logs)
+		 * Consider {@link XLog#disableLogging()} to disable XParser logging completely (even error logs)
 		 */
 		public Builder writeDebugLogs() {
 			this.writeLogs = true;
@@ -132,7 +131,7 @@ public class XConfig {
 		/**
 		 * Set up your own net engine.
 		 */
-		public Builder netEngine(INetEngine engine) {
+		public Builder netEngine(RequestHandler engine) {
 			this.netEngine = engine;
 			return this;
 		}
@@ -153,7 +152,7 @@ public class XConfig {
 			return this;
 		}
 
-		public Builder taskDataParser(IDataParser dataParser) {
+		public Builder taskDataParser(DataParser dataParser) {
 			this.dataParser = dataParser;
 			return this;
 		}
@@ -187,7 +186,7 @@ public class XConfig {
 	 * @return XConfig
 	 */
 	public static XConfig createDefaultConfig(Context context) {
-		return new Builder(context).taskDataParser(new IDataParser() {
+		return new Builder(context).taskDataParser(new DataParser() {
 			private com.google.gson.Gson gson = new com.google.gson.Gson();
 			@Override
 			public Object from(String result, Type clazz) throws Exception {

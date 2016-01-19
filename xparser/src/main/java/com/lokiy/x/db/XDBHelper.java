@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,25 +22,23 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.text.TextUtils;
 
+import com.lokiy.x.XLog;
+import com.lokiy.x.db.util.DBUtils;
+import com.lokiy.x.util.ReflectUtils;
+
 import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.lokiy.x.base.IDBHelper;
-import com.lokiy.x.base.XLog;
-import com.lokiy.x.util.DBUtils;
-import com.lokiy.x.util.ReflectUtils;
-
-import static com.lokiy.x.util.DBUtils.PRIMARY_KEY_COLUMN;
+import static com.lokiy.x.db.util.DBUtils.PRIMARY_KEY_COLUMN;
 
 /**
  * Simple DBHelper.
- * 
+ *
  * @author Luki
- * @date Aug 17, 2014 4:20:20 PM
  */
-/*public*/class XDBHelper implements IDBHelper {
+/*public*/class XDBHelper implements DBHelper {
 
 	private static final String ROW_ID_SPLIT = ",";
 	private SQLiteDatabase db;
@@ -55,7 +53,7 @@ import static com.lokiy.x.util.DBUtils.PRIMARY_KEY_COLUMN;
 
 	/**
 	 * check context
-	 * 
+	 *
 	 * @param context context
 	 */
 	private void check(Context context) {
@@ -65,8 +63,89 @@ import static com.lokiy.x.util.DBUtils.PRIMARY_KEY_COLUMN;
 	}
 
 	/**
+	 * Convenience method for inserting a row into the database.
+	 *
+	 * @param t save data fro inserting
+	 * @return the row ID of the newly inserted row, or -1 if an error occurred or exist
+	 */
+	@SuppressWarnings("unchecked")
+	public <T extends Serializable> long insert(T t) {
+		if (t == null) {
+			return -1;
+		}
+		long rowID = -1;
+		Class<T> clazz = (Class<T>) t.getClass();
+		Table<T> table = dbUtils.checkTable(clazz);
+		String tableName = table.tableName;
+		long _id = getPrimaryKeyValue(clazz, table.uniqueSelection.fillIn(t));
+		String operation = null;
+		try {
+			if (_id > 0) { // exist, update?
+//				update(t);
+				XLog.v(TAG, "operation : %s TABLE %s fail. the bean has exixts. bean = %s ", "NONE", tableName, t.toString());
+				return -1;
+			} else {// not exist and insert
+				ContentValues values = dbUtils.getContentValues(t);
+				operation = "INSERT INTO";
+				values.put(PRIMARY_KEY_COLUMN, (String) null);
+				// save the relation data's rowID to the ContentValues
+				if (table.otherTypeField.size() > 0) {
+					putRelationTableDataContentValues(t, table, values);
+				}
+				rowID = db.insert(tableName, null, values);
+				XLog.v(TAG, "operation : %s TABLE %s success. rowID = %s and the bean = %s ", operation, tableName, rowID, t.toString());
+			}
+		} catch (Exception e) {
+			XLog.w(TAG, "operation : %s TABLE %s  exception : %s", operation, tableName, e.toString());
+		}
+		return rowID;
+	}
+
+	/**
+	 * Convenience method for updating rows in the database.
+	 *
+	 * @param t data list for updating
+	 * @return the number of rows affected
+	 */
+	@SuppressWarnings("unchecked")
+	public <T extends Serializable> int update(T t) {
+		if (t == null) {
+			return 0;
+		}
+		int count = 0;
+		Class<T> clazz = (Class<T>) t.getClass();
+		Table<T> table = dbUtils.checkTable(clazz);
+		String tableName = table.tableName;
+		long _id = getPrimaryKeyValue(clazz, table.uniqueSelection.fillIn(t));
+		String operation = null;
+		try {
+			if (_id > 0) { // exist and update
+				ContentValues values = dbUtils.getContentValues(t);
+				operation = "UPDATE";
+				values.remove(PRIMARY_KEY_COLUMN);
+				// update the relation table' data( delete all mapping data and the save the relation data's rowID to
+				// the ContentValues).
+				if (table.otherTypeField.size() > 0) {
+					deleteRelationTableData(clazz, dbUtils.getSelection(t), table);
+					putRelationTableDataContentValues(t, table, values);
+				}
+
+				String[] selectionArgs = new String[]{String.valueOf(_id)};
+				count = db.update(tableName, values, PRIMARY_KEY_COLUMN + "=?", selectionArgs);
+				XLog.v(TAG, "operation : %s TABLE %s success. the number of rows affected = %s and the bean = %s ", operation, tableName, count, t.toString());
+			} else {// not exist, insert?
+//				insert(t);
+				return 0;
+			}
+		} catch (Exception e) {
+			XLog.w(TAG, "operation : %s TABLE %s  exception : %s", operation, tableName, e.toString());
+		}
+		return count;
+	}
+
+	/**
 	 * Convenience method for updating or inserting rows in the database.
-	 * 
+	 *
 	 * @param bean updating or inserting data
 	 * @return the number of rows affected
 	 */
@@ -113,7 +192,7 @@ import static com.lokiy.x.util.DBUtils.PRIMARY_KEY_COLUMN;
 
 	/**
 	 * Convenience method for updating or inserting rows in the database.
-	 * 
+	 *
 	 * @param list save data list for updating or inserting
 	 * @return the number of rows affected
 	 */
@@ -131,190 +210,31 @@ import static com.lokiy.x.util.DBUtils.PRIMARY_KEY_COLUMN;
 	}
 
 	/**
-	 * Convenience method for inserting a row into the database.
-	 * 
-	 * @param t save data fro inserting
-	 * @return the row ID of the newly inserted row, or -1 if an error occurred or exist
+	 * Convenience method for deleting rows in the database.
+	 *
+	 * @param list data list for deleting.
+	 * @return the number of rows affected if a whereClause is passed in, 0 otherwise. To remove all rows and get a
+	 * count pass "1" as the whereClause.
 	 */
-	@SuppressWarnings("unchecked")
-	public <T extends Serializable> long insert(T t) {
-		if (t == null) {
-			return -1;
-		}
-		long rowID = -1;
-		Class<T> clazz = (Class<T>) t.getClass();
-		Table<T> table = (Table<T>) dbUtils.checkTable(clazz);
-		String tableName = table.tableName;
-		long _id = getPrimaryKeyValue(clazz, table.uniqueSelection.fillIn(t));
-		String operation = null;
-		try {
-			if (_id > 0) { // exist, update?
-//				update(t);				
-				XLog.v(TAG, "operation : %s TABLE %s fail. the bean has exixts. bean = %s ", "NONE", tableName, t.toString());
-				return -1;
-			} else {// not exist and insert
-				ContentValues values = dbUtils.getContentValues(t);
-				operation = "INSERT INTO";
-				values.put(PRIMARY_KEY_COLUMN, (String) null);
-				// save the relation data's rowID to the ContentValues
-				if (table.otherTypeField.size() > 0) {
-					putRelationTableDataContentValues(t, table, values);
-				}
-				rowID = db.insert(tableName, null, values);
-				XLog.v(TAG, "operation : %s TABLE %s success. rowID = %s and the bean = %s ", operation, tableName, rowID, t.toString());
-			}
-		} catch (Exception e) {
-			XLog.w(TAG, "operation : %s TABLE %s  exception : %s", operation, tableName, e.toString());
-		}
-		return rowID;
-	}
-
-	/**
-	 * Convenience method for updating rows in the database.
-	 * 
-	 * @param t data list for updating
-	 * @return the number of rows affected
-	 */
-	@SuppressWarnings("unchecked")
-	public <T extends Serializable> int update(T t) {
-		if (t == null) {
-			return 0;
-		}
+	public <T extends Serializable> int delete(List<T> list) {
 		int count = 0;
-		Class<T> clazz = (Class<T>) t.getClass();
-		Table<T> table = (Table<T>) dbUtils.checkTable(clazz);
-		String tableName = table.tableName;
-		long _id = getPrimaryKeyValue(clazz, table.uniqueSelection.fillIn(t));
-		String operation = null;
-		try {
-			if (_id > 0) { // exist and update
-				ContentValues values = dbUtils.getContentValues(t);
-				operation = "UPDATE";
-				values.remove(PRIMARY_KEY_COLUMN);
-				// update the relation table' data( delete all mapping data and the save the relation data's rowID to
-				// the ContentValues).
-				if (table.otherTypeField.size() > 0) {
-					deleteRelationTableData(clazz, dbUtils.getSelection(t), table);
-					putRelationTableDataContentValues(t, table, values);
-				}
-
-				String[] selectionArgs = new String[] { String.valueOf(_id) };
-				count = db.update(tableName, values, PRIMARY_KEY_COLUMN + "=?", selectionArgs);
-				XLog.v(TAG, "operation : %s TABLE %s success. the number of rows affected = %s and the bean = %s ", operation, tableName,
-						count, t.toString());
-			} else {// not exist, insert?
-//				insert(t);
-				return 0;
-			}
-		} catch (Exception e) {
-			XLog.w(TAG, "operation : %s TABLE %s  exception : %s", operation, tableName, e.toString());
+		if (list == null || list.isEmpty()) {
+			return count;
+		}
+		for (T bean : list) {
+			if (bean == null)
+				continue;
+			count += delete(bean);
 		}
 		return count;
 	}
 
 	/**
-	 * find the data with bean.
-	 * 
-	 * @param bean which contains field' value. And that can auto consist of selection.
-	 * @return T
-	 */
-	@SuppressWarnings("unchecked")
-	public <T extends Serializable> T findByBean(T bean) {
-		DBSelection<T> selection = dbUtils.getSelection(bean);
-		Class<T> class1 = (Class<T>) bean.getClass();
-		return findBySelection(class1, selection);
-	}
-
-	/**
-	 * find the data with selection.
-	 * 
-	 * @param clazz table and bean.
-	 * @param selection A filter declaring which rows to return, formatted as an SQL WHERE clause (excluding the WHERE
-	 *            itself). Passing null will return all rows for the given table.
-	 * @return clazz's instance
-	 */
-	public <T extends Serializable> T findBySelection(Class<T> clazz, DBSelection<T> selection) {
-		List<T> list = selectBySelection(clazz, selection);
-		return list.size() > 0 ? list.get(0) : null;
-	}
-
-	/**
-	 * find the data with bean.
-	 * 
-	 * @param bean which contains field' value. And that can auto consist of selection.
-	 * @return List
-	 */
-	@SuppressWarnings("unchecked")
-	public <T extends Serializable> List<T> selectByBean(T bean) {
-		DBSelection<T> selection = dbUtils.getSelection(bean);
-		Class<T> class1 = (Class<T>) bean.getClass();
-		return selectBySelection(class1, selection);
-	}
-
-	/**
-	 * find the data with selection.
-	 * 
-	 * @param clazz table and bean.
-	 * @param selection A filter declaring which rows to return, formatted as an SQL WHERE clause (excluding the WHERE
-	 *            itself). Passing null will return all rows for the given table.
-	 * @return clazz's instance
-	 */
-	public <T extends Serializable> List<T> selectBySelection(Class<T> clazz, DBSelection<T> selection) {
-		checkClass(clazz);
-		List<T> list = new ArrayList<T>();
-		Table<T> table = dbUtils.checkTable(clazz);
-		Cursor c = null;
-		try {
-			if (selection == null) {
-				selection = dbUtils.getSelection(clazz.newInstance());
-			}
-			String[] selectionArgs = selection.selectionArgs;
-			if (XLog.isLogging()) {
-				String sql = SQLiteQueryBuilder.buildQueryString(false, table.tableName, null, selection.selection, null, null,
-						selection.orderBy, null);
-				if (selectionArgs != null) {
-					sql = sql.replace("?", "%s");
-					Object[] dest = new Object[selectionArgs.length];
-					System.arraycopy(selectionArgs, 0, dest, 0, selectionArgs.length);
-					XLog.v(TAG, sql, dest);
-				} else {
-					XLog.v(TAG, sql);
-				}
-			}
-
-			c = db.query(table.tableName, null, selection.selection, selectionArgs, null, null, selection.orderBy);
-			if (null != c && c.getCount() > 0) {
-				while (c.moveToNext()) {
-					T t = (T) dbUtils.getObject(clazz, c);
-					addRelationData(c, table, t);
-					list.add(t);
-				}
-			}
-		} catch (Exception e) {
-			XLog.w(TAG, e);
-		} finally {
-			if (c != null) {
-				c.close();
-			}
-		}
-		return list;
-	}
-
-	private <T extends Serializable> void checkClass(Class<T> clazz) {
-		if (clazz == null) {
-			throw new IllegalArgumentException("clazz must be not null.");
-		}
-		if (!ReflectUtils.hasParameterlessConstructor(clazz)) {
-			throw new IllegalArgumentException(clazz.getName() + " must be has a parameterless constructor.");
-		}
-	}
-
-	/**
 	 * Convenience method for deleting rows in the database.
-	 * 
+	 *
 	 * @param t data for deleting.
 	 * @return the number of rows affected if a whereClause is passed in, 0 otherwise. To remove all rows and get a
-	 *         count pass "1" as the whereClause.
+	 * count pass "1" as the whereClause.
 	 */
 	@SuppressWarnings("unchecked")
 	public <T extends Serializable> int delete(T t) {
@@ -324,10 +244,10 @@ import static com.lokiy.x.util.DBUtils.PRIMARY_KEY_COLUMN;
 
 	/**
 	 * Convenience method for deleting rows in the database.
-	 * 
+	 *
 	 * @param clazz data for deleting.
 	 * @return the number of rows affected if a whereClause is passed in, 0 otherwise. To remove all rows and get a
-	 *         count pass "1" as the whereClause.
+	 * count pass "1" as the whereClause.
 	 */
 	public <T extends Serializable> int deleteBySelection(Class<T> clazz, DBSelection<T> selection) {
 		int count = 0;
@@ -344,30 +264,118 @@ import static com.lokiy.x.util.DBUtils.PRIMARY_KEY_COLUMN;
 	}
 
 	/**
-	 * Convenience method for deleting rows in the database.
-	 * 
-	 * @param list data list for deleting.
-	 * @return the number of rows affected if a whereClause is passed in, 0 otherwise. To remove all rows and get a
-	 *         count pass "1" as the whereClause.
+	 * find the data with bean.
+	 *
+	 * @param bean which contains field' value. And that can auto consist of selection.
+	 * @return T
 	 */
-	public <T extends Serializable> int delete(List<T> list) {
-		int count = 0;
-		if (list == null || list.isEmpty()) {
-			return count;
+	@SuppressWarnings("unchecked")
+	public <T extends Serializable> T findByBean(T bean) {
+		DBSelection<T> selection = dbUtils.getSelection(bean);
+		Class<T> class1 = (Class<T>) bean.getClass();
+		return findBySelection(class1, selection);
+	}
+
+	/**
+	 * find the data with selection.
+	 *
+	 * @param clazz     table and bean.
+	 * @param selection A filter declaring which rows to return, formatted as an SQL WHERE clause (excluding the WHERE
+	 *                  itself). Passing null will return all rows for the given table.
+	 * @return clazz's instance
+	 */
+	public <T extends Serializable> T findBySelection(Class<T> clazz, DBSelection<T> selection) {
+		List<T> list = selectBySelection(clazz, selection);
+		return list.size() > 0 ? list.get(0) : null;
+	}
+
+	/**
+	 * find the data with bean.
+	 *
+	 * @param bean which contains field' value. And that can auto consist of selection.
+	 * @return List
+	 */
+	@SuppressWarnings("unchecked")
+	public <T extends Serializable> List<T> selectByBean(T bean) {
+		DBSelection<T> selection = dbUtils.getSelection(bean);
+		Class<T> class1 = (Class<T>) bean.getClass();
+		return selectBySelection(class1, selection);
+	}
+
+	/**
+	 * find the data with selection.
+	 *
+	 * @param clazz     table and bean.
+	 * @param selection A filter declaring which rows to return, formatted as an SQL WHERE clause (excluding the WHERE
+	 *                  itself). Passing null will return all rows for the given table.
+	 * @return clazz's instance
+	 */
+	public <T extends Serializable> List<T> selectBySelection(Class<T> clazz, DBSelection<T> selection) {
+		checkClass(clazz);
+		List<T> list = new ArrayList<>();
+		Table<T> table = dbUtils.checkTable(clazz);
+		Cursor c = null;
+		try {
+			if (selection == null) {
+				selection = dbUtils.getSelection(clazz.newInstance());
+			}
+			String[] selectionArgs = selection.selectionArgs;
+			if (XLog.isLogging()) {
+				String sql = SQLiteQueryBuilder.buildQueryString(false, table.tableName, null, selection.selection, null, null, selection.orderBy, null);
+				if (selectionArgs != null) {
+					sql = sql.replace("?", "%s");
+					Object[] dest = new Object[selectionArgs.length];
+					System.arraycopy(selectionArgs, 0, dest, 0, selectionArgs.length);
+					XLog.v(TAG, sql, dest);
+				} else {
+					XLog.v(TAG, sql);
+				}
+			}
+
+			c = db.query(table.tableName, null, selection.selection, selectionArgs, null, null, selection.orderBy);
+			if (null != c && c.getCount() > 0) {
+				while (c.moveToNext()) {
+					T t = dbUtils.getObject(clazz, c);
+					addRelationData(c, table, t);
+					list.add(t);
+				}
+			}
+		} catch (Exception e) {
+			XLog.w(TAG, e);
+		} finally {
+			if (c != null) {
+				c.close();
+			}
 		}
-		for (T bean : list) {
-			if (bean == null) continue;
-			count += delete(bean);
+		return list;
+	}
+
+	public synchronized void close() {
+		if (db != null) {
+			db.close();
 		}
-		return count;
+		DBEntryMap.destroy(dbName);
+	}
+
+	public boolean isOpen() {
+		return db.isOpen();
+	}
+
+	private <T extends Serializable> void checkClass(Class<T> clazz) {
+		if (clazz == null) {
+			throw new IllegalArgumentException("clazz must be not null.");
+		}
+		if (!ReflectUtils.hasParameterlessConstructor(clazz)) {
+			throw new IllegalArgumentException(clazz.getName() + " must be has a parameterless constructor.");
+		}
 	}
 
 	/**
 	 * add the relation data to t.
-	 * 
-	 * @param c cursor
+	 *
+	 * @param c     cursor
 	 * @param table table
-	 * @param t t
+	 * @param t     t
 	 * @throws Exception
 	 */
 	private <T extends Serializable> void addRelationData(Cursor c, Table<T> table, T t) throws Exception {
@@ -389,40 +397,38 @@ import static com.lokiy.x.util.DBUtils.PRIMARY_KEY_COLUMN;
 				continue;
 			}
 
-			DBSelection<T> dbSelection = new DBSelection<T>();
+			DBSelection<T> dbSelection = new DBSelection<>();
 			dbSelection.selection = "ROWID=?";
 			if (field.getType() == List.class || field.getType() == ArrayList.class) {
-				List<T> l = new ArrayList<T>();
+				List<T> l = new ArrayList<>();
 				String[] rowIDs = cv.split(ROW_ID_SPLIT);
 				for (String rowID : rowIDs) {
-					dbSelection.selectionArgs = new String[] { rowID };
+					dbSelection.selectionArgs = new String[]{rowID};
 					l.addAll(selectBySelection(clazz1, dbSelection));
 				}
 				field.set(t, l);
 			} else {
-				if (clazz1 instanceof Serializable) {
-					dbSelection.selectionArgs = new String[] { cv };
-					List<T> l = selectBySelection(clazz1, dbSelection);
-					if (l.isEmpty()) {
-						continue;
-					}
-					T obj = (T) l.get(0);
-					if (obj == null) {
-						continue;
-					}
-
-					field.set(t, obj);
+				dbSelection.selectionArgs = new String[]{cv};
+				List<T> l = selectBySelection(clazz1, dbSelection);
+				if (l.isEmpty()) {
+					continue;
 				}
+				T obj = l.get(0);
+				if (obj == null) {
+					continue;
+				}
+
+				field.set(t, obj);
 			}
 		}
 	}
 
 	/**
 	 * delete the relation data.
-	 * 
-	 * @param clazz parent table
+	 *
+	 * @param clazz     parent table
 	 * @param selection unique selection
-	 * @param table can be null.
+	 * @param table     can be null.
 	 */
 	private <T extends Serializable> void deleteRelationTableData(Class<T> clazz, DBSelection<T> selection, Table<T> table) {
 		if (table == null) {
@@ -446,9 +452,9 @@ import static com.lokiy.x.util.DBUtils.PRIMARY_KEY_COLUMN;
 				}
 				String[] rowIDs = cv.split(ROW_ID_SPLIT);
 				for (String rowID : rowIDs) {
-					DBSelection<T> sel = new DBSelection<T>();
+					DBSelection<T> sel = new DBSelection<>();
 					sel.selection = "ROWID=?";
-					sel.selectionArgs = new String[] { rowID };
+					sel.selectionArgs = new String[]{rowID};
 					deleteBySelection(clazz1, sel);
 					XLog.v(TAG, "operation : %s TABLE %s success. And the ROWID = %s ", "DELETE", clazz1.getSimpleName(), rowID);
 				}
@@ -461,9 +467,9 @@ import static com.lokiy.x.util.DBUtils.PRIMARY_KEY_COLUMN;
 
 	/**
 	 * set relation table data to the ContentValues.
-	 * 
-	 * @param bean from bean
-	 * @param table can be null
+	 *
+	 * @param bean   from bean
+	 * @param table  can be null
 	 * @param values target ContentValues
 	 * @throws Exception
 	 */
@@ -507,8 +513,8 @@ import static com.lokiy.x.util.DBUtils.PRIMARY_KEY_COLUMN;
 
 	/**
 	 * get Primary key.
-	 * 
-	 * @param clazz target table's class
+	 *
+	 * @param clazz           target table's class
 	 * @param uniqueSelection unique selection
 	 * @return the primary key value.
 	 */
@@ -531,16 +537,5 @@ import static com.lokiy.x.util.DBUtils.PRIMARY_KEY_COLUMN;
 			}
 		}
 		return _id;
-	}
-
-	public synchronized void close() {
-		if (db != null) {
-			db.close();
-		}
-		DBEntryMap.destroy(dbName);
-	}
-
-	public boolean isOpen() {
-		return db.isOpen();
 	}
 }

@@ -15,21 +15,21 @@
  */
 package com.lokiy.x.task;
 
-import java.io.Serializable;
-import java.util.Map;
-
 import com.lokiy.x.XParser;
-import com.lokiy.x.base.AsyncTask;
-import com.lokiy.x.base.IDBHelper;
-import com.lokiy.x.base.XLog;
+import com.lokiy.x.XTask;
+import com.lokiy.x.task.base.AsyncTask;
+import com.lokiy.x.db.DBHelper;
+import com.lokiy.x.XLog;
 import com.lokiy.x.db.DBSelection;
 import com.lokiy.x.task.AsyncResult.LoadFrom;
 import com.lokiy.x.task.AsyncResult.ResultStatus;
 import com.lokiy.x.util.CacheUtil;
-import com.lokiy.x.util.DBUtils;
+import com.lokiy.x.db.util.DBUtils;
 import com.lokiy.x.util.MD5;
 import com.lokiy.x.util.NetStatusUtils;
-import com.lokiy.x.util.NetUtils;
+
+import java.io.Serializable;
+import java.util.Map;
 
 /**
  * Task core
@@ -37,22 +37,14 @@ import com.lokiy.x.util.NetUtils;
  * @param <T>
  * @author Luki
  */
-public class TaskEngine<T extends Serializable> extends AsyncTask<TaskParams<T>, Void, AsyncResult<T>> {
+public class TaskEngine<T extends Serializable> extends XTask<T> {
 
 	private static final String CACHE_DATA_DB = "cache_data";
-	private static final NetUtils mNetUtils = NetUtils.INSTANCE;
 	private static final CacheUtil mCacheUtil = CacheUtil.getInstance();
-	private static TaskConfig taskConfig = new TaskConfig();
 	private TaskParams<T> mParams;
-	private TaskConfig config;
 
-	/**
-	 *
-	 */
-	public TaskEngine() {}
-
-	public static synchronized boolean isInit() {
-		return taskConfig == null;
+	public TaskEngine(TaskStatusListener callBack, TaskConfig config) {
+		super(callBack, config);
 	}
 
 	@SafeVarargs
@@ -138,6 +130,7 @@ public class TaskEngine<T extends Serializable> extends AsyncTask<TaskParams<T>,
 			return super.execute(params);
 	}
 
+	@Override
 	public final TaskCallBack<AsyncResult<T>> getListener() {
 		return mParams.listener;
 	}
@@ -161,7 +154,7 @@ public class TaskEngine<T extends Serializable> extends AsyncTask<TaskParams<T>,
 					key,
 					String.valueOf(System.currentTimeMillis() - mParams.cacheTime)
 			};
-			IDBHelper create = XParser.INSTANCE.getDBHelper(CACHE_DATA_DB);
+			DBHelper create = XParser.INSTANCE.getDBHelper(CACHE_DATA_DB);
 			TaskResult results = create.findBySelection(TaskResult.class, selection);
 			isFailure = results == null;
 		} else {
@@ -244,7 +237,7 @@ public class TaskEngine<T extends Serializable> extends AsyncTask<TaskParams<T>,
 
 	private void saveObject(Serializable result, String key) {
 		if (config.cacheInDB) {
-			IDBHelper create = XParser.INSTANCE.getDBHelper(CACHE_DATA_DB);
+			DBHelper create = XParser.INSTANCE.getDBHelper(CACHE_DATA_DB);
 			TaskResult bean = new TaskResult();
 			bean.setKey(key);
 			bean.setValue(result.toString());
@@ -270,7 +263,7 @@ public class TaskEngine<T extends Serializable> extends AsyncTask<TaskParams<T>,
 			DBSelection<TaskResult> selection = new DBSelection<>();
 			selection.selection = "key=?";
 			selection.selectionArgs = new String[]{key};
-			IDBHelper create = XParser.INSTANCE.getDBHelper(CACHE_DATA_DB);
+			DBHelper create = XParser.INSTANCE.getDBHelper(CACHE_DATA_DB);
 			TaskResult results = create.findBySelection(TaskResult.class, selection);
 			if (results != null) {
 				String value = results.getValue();
@@ -287,14 +280,5 @@ public class TaskEngine<T extends Serializable> extends AsyncTask<TaskParams<T>,
 			result.loadedFrom = LoadFrom.CACHE;
 		}
 		return result;
-	}
-
-	public final void setConfig(TaskConfig config) {
-		mNetUtils.getNetEngine().setHttpConfig(config);
-		if (config.isDefault) {
-			taskConfig = config;
-		} else {
-			this.config = config;
-		}
 	}
 }

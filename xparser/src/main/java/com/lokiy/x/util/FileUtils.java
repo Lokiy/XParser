@@ -15,6 +15,13 @@
  */
 package com.lokiy.x.util;
 
+import android.content.Context;
+import android.content.res.AssetManager;
+import android.os.Environment;
+import android.text.TextUtils;
+
+import com.lokiy.x.XLog;
+
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -24,12 +31,6 @@ import java.io.OutputStream;
 import java.io.RandomAccessFile;
 import java.net.HttpURLConnection;
 import java.net.URL;
-
-import com.lokiy.x.base.XLog;
-import android.content.Context;
-import android.content.res.AssetManager;
-import android.os.Environment;
-import android.text.TextUtils;
 
 @SuppressWarnings("ResultOfMethodCallIgnored")
 public class FileUtils {
@@ -227,7 +228,7 @@ public class FileUtils {
 		byte[] buf = new byte[10240];
 		int size;
 		RandomAccessFile rndFile;
-		File file = new File(filePath + "\\" + fileName);
+		File file = new File(filePath + "/" + fileName);
 		long remoteFileSize = getRemoteFileSize(remoteUrl);
 		long nPos = 0;
 

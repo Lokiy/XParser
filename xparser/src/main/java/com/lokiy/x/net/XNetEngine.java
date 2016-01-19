@@ -17,6 +17,9 @@ package com.lokiy.x.net;
 
 import android.text.TextUtils;
 
+import com.lokiy.x.XLog;
+import com.lokiy.x.task.TaskConfig;
+
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
@@ -26,14 +29,10 @@ import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLSession;
 
-import com.lokiy.x.base.INetEngine;
-import com.lokiy.x.base.XLog;
-import com.lokiy.x.task.TaskConfig;
-
 /**
  * XNetEngine
  */
-public class XNetEngine implements INetEngine {
+public class XNetEngine implements RequestHandler {
 	private static final String TAG = XNetEngine.class.getSimpleName();
 	protected static int DEFAULT_SOCKET_TIMEOUT = 15 * 1000;
 	private int RETRY_TIMES = 2;

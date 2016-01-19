@@ -15,10 +15,10 @@
  */
 package com.lokiy.x.db;
 
-import java.io.Serializable;
-
-import com.lokiy.x.db.annotation.Unique;
 import com.lokiy.x.db.annotation.TableVersion;
+import com.lokiy.x.db.annotation.Unique;
+
+import java.io.Serializable;
 
 /**
  * DB table info.

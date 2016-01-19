@@ -15,15 +15,16 @@
  */
 package com.lokiy.x.inject.content.annotation;
 
+import android.view.View;
+
+import com.lokiy.x.inject.content.XParserCallBack;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Array;
 import java.util.List;
-
-import android.view.View;
-import com.lokiy.x.base.XParserCallBack;
 
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)

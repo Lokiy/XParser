@@ -15,22 +15,6 @@
  */
 package com.lokiy.x.inject.view;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-
-import com.lokiy.x.XConfig;
-import com.lokiy.x.XParser;
-import com.lokiy.x.base.ParserCallBack;
-import com.lokiy.x.base.XLog;
-import com.lokiy.x.inject.content.annotation.XCDParser;
-import com.lokiy.x.inject.content.annotation.XCDString;
-import com.lokiy.x.inject.view.annotation.ListenerInject;
-import com.lokiy.x.inject.view.annotation.ListenerInject.ListenerType;
-import com.lokiy.x.inject.view.annotation.Select;
-import com.lokiy.x.inject.view.annotation.ViewInject;
-import com.lokiy.x.util.ReflectUtils;
-import com.lokiy.x.util.WidgetUtils;
-import com.lokiy.x.util.WidgetUtils.ResType;
 import android.app.Activity;
 import android.text.TextUtils;
 import android.view.MotionEvent;
@@ -46,6 +30,23 @@ import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.RadioGroup;
+
+import com.lokiy.x.XConfig;
+import com.lokiy.x.XParser;
+import com.lokiy.x.XLog;
+import com.lokiy.x.inject.content.ParserCallBack;
+import com.lokiy.x.inject.content.annotation.XCDParser;
+import com.lokiy.x.inject.content.annotation.XCDString;
+import com.lokiy.x.inject.view.annotation.ListenerInject;
+import com.lokiy.x.inject.view.annotation.ListenerInject.ListenerType;
+import com.lokiy.x.inject.view.annotation.Select;
+import com.lokiy.x.inject.view.annotation.ViewInject;
+import com.lokiy.x.util.ReflectUtils;
+import com.lokiy.x.util.WidgetUtils;
+import com.lokiy.x.util.WidgetUtils.ResType;
+
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 
 /**
  * @author Luki

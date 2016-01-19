@@ -15,9 +15,10 @@
  */
 package com.lokiy.x.simple;
 
-import com.lokiy.x.base.XParserCallBack;
-import com.lokiy.x.inject.content.InjectHolder;
 import android.view.View;
+
+import com.lokiy.x.inject.content.InjectHolder;
+import com.lokiy.x.inject.content.XParserCallBack;
 
 /**
  * @author Luki

@@ -15,12 +15,12 @@
  */
 package com.lokiy.x.task;
 
+import com.lokiy.x.util.NetUtils.Method;
+
 import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import com.lokiy.x.util.NetUtils.Method;
 
 /**
  * The basic parameters of the task request<BR>

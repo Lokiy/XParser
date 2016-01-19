@@ -15,14 +15,15 @@
  */
 package com.lokiy.x.simple;
 
-import java.io.Serializable;
-
-import com.lokiy.x.inject.content.InjectAdapter;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.view.View;
 import android.widget.AdapterView;
+
+import com.lokiy.x.inject.content.InjectAdapter;
+
+import java.io.Serializable;
 
 /**
  * Simple of InjectAdapter

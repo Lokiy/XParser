@@ -1,4 +1,4 @@
-package com.lokiy.x.base;
+package com.lokiy.x;
 
 /*******************************************************************************
  * Copyright 2011-2013 Sergey Tarasevich
@@ -16,9 +16,10 @@ package com.lokiy.x.base;
  * limitations under the License.
  *******************************************************************************/
 
+import android.util.Log;
+
 import com.lokiy.x.inject.content.InjectParser;
 import com.lokiy.x.util.InjectUtils;
-import android.util.Log;
 
 /**
  * "Less-word" analog of Android {@link Log logger}

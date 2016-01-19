@@ -15,11 +15,11 @@
  */
 package com.lokiy.x.util;
 
-import static java.lang.Math.PI;
+import android.graphics.PointF;
 
 import java.text.DecimalFormat;
 
-import android.graphics.PointF;
+import static java.lang.Math.PI;
 
 public class MathUtils {
 	private final static double R = 6371229; // R

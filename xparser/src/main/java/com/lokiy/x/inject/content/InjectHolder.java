@@ -15,10 +15,11 @@
  */
 package com.lokiy.x.inject.content;
 
-import java.util.HashMap;
+import android.view.View;
 
 import com.lokiy.x.XConfig;
-import android.view.View;
+
+import java.util.HashMap;
 
 /**
  * View Holder <BR>

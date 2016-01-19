@@ -13,26 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lokiy.x.util;
+package com.lokiy.x.db.util;
 
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.text.TextUtils;
 
-import java.io.Serializable;
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import com.lokiy.x.base.IDBHelper;
-import com.lokiy.x.base.XLog;
+import com.lokiy.x.db.DBHelper;
+import com.lokiy.x.XLog;
 import com.lokiy.x.db.DBSelection;
 import com.lokiy.x.db.Table;
 import com.lokiy.x.db.TableInfo;
@@ -44,6 +33,19 @@ import com.lokiy.x.db.annotation.OrderBy.SortAs;
 import com.lokiy.x.db.annotation.Rename;
 import com.lokiy.x.db.annotation.TableVersion;
 import com.lokiy.x.db.annotation.Unique;
+import com.lokiy.x.util.DESUtil;
+import com.lokiy.x.util.ReflectUtils;
+
+import java.io.Serializable;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class DBUtils {
 
@@ -57,15 +59,15 @@ public class DBUtils {
 	private static final Map<String, DBUtils> instanceMap = new HashMap<>();
 	private SQLiteDatabase db;
 	private String dbName;
-	private IDBHelper helper;
+	private DBHelper helper;
 
-	private DBUtils(SQLiteDatabase db, String dbName, IDBHelper helper) {
+	private DBUtils(SQLiteDatabase db, String dbName, DBHelper helper) {
 		this.db = db;
 		this.dbName = dbName;
 		this.helper = helper;
 	}
 
-	public static DBUtils getInstance(SQLiteDatabase db, String dbName, IDBHelper helper) {
+	public static DBUtils getInstance(SQLiteDatabase db, String dbName, DBHelper helper) {
 		DBUtils dbUtils;
 		if ((dbUtils = instanceMap.get(dbName)) == null) {
 			dbUtils = new DBUtils(db, dbName, helper);

@@ -15,10 +15,10 @@
  */
 package com.lokiy.x.text;
 
-import java.util.regex.Pattern;
-
 import android.text.Editable;
 import android.widget.EditText;
+
+import java.util.regex.Pattern;
 
 /**
  * @author Luki

@@ -15,20 +15,17 @@
  */
 package com.lokiy.x.inject.content;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import com.lokiy.x.XParser;
-import com.lokiy.x.base.IXAdapter;
-import com.lokiy.x.base.IXExpandableAdapter;
-import com.lokiy.x.base.XParserCallBack;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
 
-public abstract class InjectExpandableAdapter<Group extends IXExpandableAdapter<Child>, Child> extends BaseExpandableListAdapter implements
-		IXAdapter<Group> {
+import com.lokiy.x.XParser;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public abstract class InjectExpandableAdapter<Group extends XExpandableAdapter<Child>, Child> extends BaseExpandableListAdapter implements XAdapter<Group> {
 
 	private List<Group> mData = new ArrayList<Group>();
 	private int mPageIndex = 1;

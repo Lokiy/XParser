@@ -13,14 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lokiy.x.base;
+package com.lokiy.x.task;
+
+import java.lang.reflect.Type;
 
 /**
  * @author Luki
- * @version 1 Jan 6, 2015 10:25:46 AM
+ * @version 1 Feb 4, 2015 1:50:13 PM
  * @since 1.0
  */
-public interface IAdapterView<T> {
+public interface DataParser {
 
-	void setAdapter(T adapter);
+	Object from(String result, Type clazz) throws Exception;
 }

@@ -15,9 +15,9 @@
  */
 package com.lokiy.x.task;
 
-import java.io.Serializable;
-
 import com.lokiy.x.util.NetStatusUtils.NetType;
+
+import java.io.Serializable;
 
 /**
  * task callback bean
