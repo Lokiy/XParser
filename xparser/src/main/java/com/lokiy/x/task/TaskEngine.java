@@ -15,16 +15,17 @@
  */
 package com.lokiy.x.task;
 
+import com.lokiy.x.XLog;
 import com.lokiy.x.XParser;
 import com.lokiy.x.XTask;
-import com.lokiy.x.task.base.AsyncTask;
 import com.lokiy.x.db.DBHelper;
-import com.lokiy.x.XLog;
 import com.lokiy.x.db.DBSelection;
+import com.lokiy.x.db.util.DBUtils;
+import com.lokiy.x.net.RequestHandler;
 import com.lokiy.x.task.AsyncResult.LoadFrom;
 import com.lokiy.x.task.AsyncResult.ResultStatus;
+import com.lokiy.x.task.base.AsyncTask;
 import com.lokiy.x.util.CacheUtil;
-import com.lokiy.x.db.util.DBUtils;
 import com.lokiy.x.util.MD5;
 import com.lokiy.x.util.NetStatusUtils;
 
@@ -49,7 +50,7 @@ public class TaskEngine<T extends Serializable> extends XTask<T> {
 
 	@SafeVarargs
 	@Override
-	protected final AsyncResult<T> doInBackground(TaskParams<T>... params) {
+	protected final AsyncResult<T> doInBackground(TaskParams<T>... taskParams) {
 		AsyncResult<T> result = new AsyncResult<>();
 		result.params = mParams;
 		String httpUrl = mParams.url;
@@ -57,18 +58,22 @@ public class TaskEngine<T extends Serializable> extends XTask<T> {
 		String generateKey = mParams.generateKey();
 		String key = MD5.md5s(generateKey);
 		long millis = System.currentTimeMillis();
-		Map<String, String> requestParams = mParams.getParams();
 		try {
 			if ((NetStatusUtils.isNetworkConnected() && (mParams.isForceRefresh || isCacheDataFailure(key, mParams.cacheTime)))) {
 				String resultString = null;
 				try {
+					RequestHandler.RequestParams requestParams = new RequestHandler.RequestParams();
+					requestParams.params = mParams.getParams();
+					requestParams.dataList = mParams.getDataList();
+					requestParams.headers = mParams.getHeaders();
+					requestParams.timeOut = mParams.timeOut;
 					switch (mParams.method) {
 						case GET:
-							resultString = mNetUtils.get(httpUrl, mParams.getHeaders());
+							resultString = mConfig.requestHandler.get(httpUrl, requestParams);
 							break;
 						case POST:
 						default:
-							resultString = mNetUtils.post(httpUrl, requestParams, mParams.getHeaders(), mParams.getDataList());
+							resultString = mConfig.requestHandler.post(httpUrl, requestParams);
 							break;
 					}
 					log(resultString, millis);
@@ -79,7 +84,7 @@ public class TaskEngine<T extends Serializable> extends XTask<T> {
 					log(e.toString(), millis);
 				}
 				if (result.status == ResultStatus.SUCCESS && mParams.isAllowLoadCache) {
-					if (!config.cacheInDB) {
+					if (!mConfig.cacheInDB) {
 						saveObject(result, key);
 					} else if (resultString != null) {
 						saveObject(resultString, key);
@@ -106,33 +111,15 @@ public class TaskEngine<T extends Serializable> extends XTask<T> {
 		return result;
 	}
 
-	@Override
-	protected void onPreExecute() {
-	}
-
-	@Override
-	protected void onPostExecute(AsyncResult<T> result) {
-		if (mParams != null && getListener() != null)
-			getListener().onResult(result);
-	}
-
 	@SafeVarargs
 	@Override
 	public final AsyncTask<TaskParams<T>, Void, AsyncResult<T>> execute(TaskParams<T>... params) {
-		if (config == null) {
-			config = taskConfig;
-		}
 		this.mParams = params[0];
-		mParams.setTaskConfig(config);
+		mParams.setTaskConfig(mConfig);
 		if (mParams.isParallel) {
 			return super.executeOnExecutor(THREAD_POOL_EXECUTOR, params);
 		} else
 			return super.execute(params);
-	}
-
-	@Override
-	public final TaskCallBack<AsyncResult<T>> getListener() {
-		return mParams.listener;
 	}
 
 	/**
@@ -147,7 +134,7 @@ public class TaskEngine<T extends Serializable> extends XTask<T> {
 		if (!mParams.isAllowLoadCache) {
 			return true;
 		}
-		if (config.cacheInDB) {
+		if (mConfig.cacheInDB) {
 			DBSelection<TaskResult> selection = new DBSelection<>();
 			selection.selection = "key=? and " + DBUtils.TIME_COLUMN + ">?";
 			selection.selectionArgs = new String[]{
@@ -215,11 +202,11 @@ public class TaskEngine<T extends Serializable> extends XTask<T> {
 				if (mParams.isParse) {
 					Object obj;
 					try {
-						obj = config.dataParser.from(json, mParams.type);
+						obj = mConfig.dataParser.from(json, mParams.type);
 					} catch (Exception e) {
-						if (config.errorType != null) {
+						if (mConfig.errorType != null) {
 							try {
-								obj = config.dataParser.from(json, config.errorType);
+								obj = mConfig.dataParser.from(json, mConfig.errorType);
 							} catch (Exception e1) {
 								throw e;
 							}
@@ -236,7 +223,7 @@ public class TaskEngine<T extends Serializable> extends XTask<T> {
 	}
 
 	private void saveObject(Serializable result, String key) {
-		if (config.cacheInDB) {
+		if (mConfig.cacheInDB) {
 			DBHelper create = XParser.INSTANCE.getDBHelper(CACHE_DATA_DB);
 			TaskResult bean = new TaskResult();
 			bean.setKey(key);
@@ -259,7 +246,7 @@ public class TaskEngine<T extends Serializable> extends XTask<T> {
 	private AsyncResult<T> readObject(String key) throws Exception {
 
 		AsyncResult<T> result = new AsyncResult<>();
-		if (config.cacheInDB) {
+		if (mConfig.cacheInDB) {
 			DBSelection<TaskResult> selection = new DBSelection<>();
 			selection.selection = "key=?";
 			selection.selectionArgs = new String[]{key};
@@ -280,5 +267,20 @@ public class TaskEngine<T extends Serializable> extends XTask<T> {
 			result.loadedFrom = LoadFrom.CACHE;
 		}
 		return result;
+	}
+
+	@Override
+	protected void onPreExecute() {
+	}
+
+	@Override
+	protected void onPostExecute(AsyncResult<T> result) {
+		if (mParams != null && getListener() != null)
+			getListener().onResult(result);
+	}
+
+	@Override
+	public final TaskCallBack<AsyncResult<T>> getListener() {
+		return mParams.listener;
 	}
 }

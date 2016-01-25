@@ -16,8 +16,6 @@
 
 package com.lokiy.x.net;
 
-import com.lokiy.x.task.TaskConfig;
-
 import java.util.List;
 import java.util.Map;
 
@@ -33,24 +31,29 @@ public interface RequestHandler {
 	 * POST 
 	 * @param url url
 	 * @param params request params
-	 * @param headers headers
 	 *
 	 * @return respond String
 	 * @throws Exception
 	 */
-	String post(String url, Map<String, String> params, Map<String, String> headers, List<Object> dataList) throws Exception;
+	String post(String url, RequestParams params) throws Exception;
 
 	/**
 	 * GET 
 	 *
 	 * @param url url
-	 * @param headers headers
-	 * @return respond String
-	 */
-	String get(String url, Map<String, String> headers) throws Exception;
-
-	/**
+	 * @param params request params
 	 *
+	 * @return respond String
+	 * @throws Exception
 	 */
-	void setHttpConfig(TaskConfig config);
+	String get(String url, RequestParams params) throws Exception;
+
+
+	class RequestParams{
+		public Map<String, String> params;
+		public Map<String, String> headers;
+		public List<Object> dataList;
+		public int retryTimes =2;
+		public int timeOut = 15 * 1000;
+	}
 }

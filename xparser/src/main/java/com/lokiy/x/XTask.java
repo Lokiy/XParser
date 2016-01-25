@@ -16,13 +16,12 @@
 
 package com.lokiy.x;
 
-import com.lokiy.x.task.base.AsyncTask;
 import com.lokiy.x.task.AsyncResult;
 import com.lokiy.x.task.TaskCallBack;
 import com.lokiy.x.task.TaskConfig;
 import com.lokiy.x.task.TaskParams;
 import com.lokiy.x.task.TaskStatusListener;
-import com.lokiy.x.util.NetUtils;
+import com.lokiy.x.task.base.AsyncTask;
 
 import java.io.Serializable;
 
@@ -36,29 +35,12 @@ import java.io.Serializable;
  */
 public abstract class XTask<T extends Serializable> extends AsyncTask<TaskParams<T>, Void, AsyncResult<T>> {
 
-	protected static TaskConfig taskConfig = new TaskConfig();
-	protected final NetUtils mNetUtils = NetUtils.INSTANCE;
-	protected TaskConfig config;
+	protected TaskConfig mConfig;
 	private TaskStatusListener mCallBack;
 
 	public XTask(TaskStatusListener callBack, TaskConfig config) {
 		this.mCallBack = callBack;
-		if (config != null) {
-			setConfig(config);
-		}
-	}
-
-	public final void setConfig(TaskConfig config) {
-		mNetUtils.getNetEngine().setHttpConfig(config);
-		if (config.isDefault) {
-			taskConfig = config;
-		} else {
-			this.config = config;
-		}
-	}
-
-	public static synchronized boolean isInit() {
-		return taskConfig == null;
+		this.mConfig = config;
 	}
 
 	@Override

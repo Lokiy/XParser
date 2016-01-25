@@ -15,8 +15,6 @@
  */
 package com.lokiy.x.task;
 
-import com.lokiy.x.util.NetUtils.Method;
-
 import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.List;
@@ -45,6 +43,7 @@ public final class TaskParams<T> {
 	long cacheTime = 60 * 60 * 1000;
 	String[] exceptKeysForGenerateKey;
 	private TaskConfig taskConfig = new TaskConfig();
+	int timeOut;
 
 	private TaskParams(String url) {
 		this.url = url;
@@ -128,11 +127,16 @@ public final class TaskParams<T> {
 		return dataList;
 	}
 
+	public enum Method {
+		GET,
+		POST
+	}
+
 	/**
 	 * Builder
 	 *
-	 * @author Luki
 	 * @param <T>
+	 * @author Luki
 	 */
 	public static class Builder<T> {
 		private String[] exceptKeysForGenerateKey;

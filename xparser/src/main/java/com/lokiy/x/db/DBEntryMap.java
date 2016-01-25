@@ -20,6 +20,7 @@ import android.text.TextUtils;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Database entry map.
@@ -63,6 +64,14 @@ public class DBEntryMap {
 		DBHelper dbHelper = helperMap.remove(dbName);
 		if (dbHelper != null && dbHelper.isOpen()) {
 			dbHelper.close();
+		}
+	}
+
+	public static void destroy() {
+		String[] keySet = new String[helperMap.keySet().size()];
+		helperMap.keySet().toArray(keySet);
+		for (String dbName : keySet) {
+			destroy(dbName);
 		}
 	}
 }

@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,9 +19,8 @@ package com.lokiy.x;
 import android.app.Activity;
 import android.view.View;
 
-import com.lokiy.x.task.base.AsyncTask;
-import com.lokiy.x.db.DBHelper;
 import com.lokiy.x.db.DBEntryMap;
+import com.lokiy.x.db.DBHelper;
 import com.lokiy.x.inject.content.IParser;
 import com.lokiy.x.inject.content.InjectHolder;
 import com.lokiy.x.inject.content.InjectParser;
@@ -29,7 +28,7 @@ import com.lokiy.x.inject.content.ParserCallBack;
 import com.lokiy.x.task.TaskConfig;
 import com.lokiy.x.task.TaskEngine;
 import com.lokiy.x.task.TaskStatusListener;
-import com.lokiy.x.util.ReflectUtils;
+import com.lokiy.x.task.base.AsyncTask;
 
 import java.io.Serializable;
 
@@ -40,11 +39,11 @@ import static com.lokiy.x.inject.view.InjectEventControl.parseWithCDAnnotation;
 /**
  * A easy tool to do something with init {@link View} or set data to View, and get a {@link DBHelper} to operate the
  * DB, and do {@link AsyncTask} with {@link XTask}.
- * 
+ *
  * @author Luki
  * @version 1 Nov 5, 2014 7:45:20 PM
- * @since 1.0
  * @see #parseView(View)
+ * @since 1.0
  */
 public enum XParser {
 	INSTANCE;
@@ -54,20 +53,17 @@ public enum XParser {
 	private static final String LOG_DESTROY = "Destroy XParser";
 
 	private static final String LOG_INIT_CONFIG = "Initialize XParser with configuration";
-	private static final String WARNING_RE_INIT_CONFIG = "Try to initialize XParser which had already been initialized before. "
-			+ "To re-init XParser with new configuration call XParser.destroy() at first.";
+	private static final String WARNING_RE_INIT_CONFIG = "Try to initialize XParser which had already been initialized before. " + "To re-init XParser with new configuration call XParser.destroy() at first.";
 	private static final String ERROR_NOT_INIT = "XParser must be init with configuration before using";
 	private static final String ERROR_INIT_CONFIG_WITH_NULL = "XParser configuration can not be initialized with null";
-
-	private XConfig configuration;
-
 	private final static IParser mDefaultParser = new InjectParser();
+	private XConfig configuration;
 
 	/**
 	 * Initializes XParser instance with configuration.<br />
 	 * If configurations was set before ( {@link #isInitialized()} == true) then this method does nothing.<br />
 	 * To force initialization with new configuration you should {@linkplain #destroy() destroy XParser} at first.
-	 * 
+	 *
 	 * @param configuration {@linkplain XConfig XParser configuration}
 	 * @throws IllegalArgumentException if <b>configuration</b> parameter is null
 	 */
@@ -95,8 +91,8 @@ public enum XParser {
 	 * Traversal the value, format, click, longClick from the InjectHolder.<BR>
 	 * see more <BR>
 	 * {@link #parseView(View)}
-	 * 
-	 * @param target The target is an Activity who contains the click or longClick method.
+	 *
+	 * @param target   The target is an Activity who contains the click or longClick method.
 	 * @param callBack callBack
 	 */
 	public void parse(Activity target, ParserCallBack callBack) {
@@ -107,9 +103,9 @@ public enum XParser {
 	 * Traversal the value, format, click, longClick from the InjectHolder.<BR>
 	 * see more <BR>
 	 * {@link #parseView(View)}
-	 * 
-	 * @param target The target is an Activity who contains the click or longClick method.
-	 * @param data dataSource
+	 *
+	 * @param target   The target is an Activity who contains the click or longClick method.
+	 * @param data     dataSource
 	 * @param callBack callBack
 	 */
 	public void parse(Activity target, Object data, ParserCallBack callBack) {
@@ -121,11 +117,11 @@ public enum XParser {
 	 * Traversal the value and format and click and longClick from the InjectHolder.<BR>
 	 * see more <BR>
 	 * {@link #parseView(View)}
-	 * 
-	 * @param target The target is an object who contains the click or longClick method. If you doesn't need click or
-	 *            longClick method, it can be null.
-	 * @param data dataSource
-	 * @param view Which contains contentDescription.
+	 *
+	 * @param target   The target is an object who contains the click or longClick method. If you doesn't need click or
+	 *                 longClick method, it can be null.
+	 * @param data     dataSource
+	 * @param view     Which contains contentDescription.
 	 * @param callBack callBack
 	 */
 	public void parse(Object target, Object data, View view, ParserCallBack callBack) {
@@ -140,7 +136,8 @@ public enum XParser {
 			view.setTag(configuration.HOLDER_KEY, holder);
 		}
 		Integer position = (Integer) view.getTag(configuration.HOLDER_POSITION);
-		if (position == null) position = -1;
+		if (position == null)
+			position = -1;
 		holder.position = position;
 
 		mDefaultParser.onParse(target, data, holder, callBack);
@@ -150,9 +147,20 @@ public enum XParser {
 	}
 
 	/**
+	 * Checks if XParser's configuration was initialized
+	 *
+	 * @throws IllegalStateException if configuration wasn't initialized
+	 */
+	private void checkConfiguration() {
+		if (configuration == null) {
+			throw new IllegalStateException(ERROR_NOT_INIT);
+		}
+	}
+
+	/**
 	 * Parse the view contentDescription for each child, and add the each child to InjectHolder.
-	 * 
-	 * @param view  views who contains contentDescription collection.
+	 *
+	 * @param view views who contains contentDescription collection.
 	 * @return views who contains contentDescription collection.
 	 */
 	public InjectHolder parseView(View view) {
@@ -169,7 +177,7 @@ public enum XParser {
 
 	/**
 	 * initial all views and it's listener method in the activity. see more {@link #inject(Object, View)}
-	 * 
+	 *
 	 * @param activity activity
 	 */
 	public void inject(Activity activity) {
@@ -180,7 +188,7 @@ public enum XParser {
 	 * initial all views and it's listener method in the view. And the listener method should be in the target.
 	 * All about the annotation should write in the target <BR>
 	 * e.g.<BR>
-	 *     <pre>
+	 * <pre>
 	 * public class Sample {
 	 * 		＠ViewInject(value = R.id.test, longClick = "longClick")
 	 * 		View v;
@@ -191,23 +199,23 @@ public enum XParser {
 	 * 		public Sample(View view) {
 	 * 			this.view = view;
 	 * 			ViewInjectUtil.initViewInject(this, view);
-	 * 		}
+	 *        }
 	 *
 	 * 		＠ViewListener(ids = {R.id.test}, type=ListenerType.CLICK)
 	 * 		public void click(View v){
 	 * 			Toast.makeText(view.getContext(), "click", Toast.LENGTH_SHORT).show();
-	 * 		}
+	 *        }
 	 *
 	 * 		public boolean longClick(View v){
 	 * 			Toast.makeText(view.getContext(), "longClick", Toast.LENGTH_SHORT).show();
 	 * 			return true;
-	 * 		}
+	 *        }
 	 *
 	 * }
 	 *     </pre>
-	 * 
+	 *
 	 * @param target target
-	 * @param view view
+	 * @param view   view
 	 */
 	public void inject(Object target, View view) {
 		initView(target, view);
@@ -217,51 +225,51 @@ public enum XParser {
 
 	/**
 	 * Get a XTask instance.
-	 * 
+	 *
 	 * @param callBack callBack
 	 * @return XTask
 	 */
 	public <T extends Serializable> XTask<T> getXTask(TaskStatusListener callBack) {
-		checkConfiguration();
-		TaskConfig config = null;
-		if (!XTask.isInit()) {
-			config = new TaskConfig();
-			config.cacheInDB = configuration.cacheInDB;
-			config.errorType = configuration.errorType;
-			config.requestExtras = configuration.requestExtras;
-			config.requestHeaders = configuration.requestHeaders;
-			config.timeOut = configuration.timeout;
-			config.retryTimes = configuration.times;
-			config.dataParser = configuration.dataParser;
-			try {
-				ReflectUtils.setFieldValue(config, "isDefault", true);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
-		return new TaskEngine<>(callBack, config);
+		return getXTask(callBack, null);
 	}
 
 	/**
 	 * Get a XTask instance with taskConfig.
-	 * 
+	 *
 	 * @param callBack callBack
 	 * @return XTask
 	 */
 	public <T extends Serializable> XTask<T> getXTask(TaskStatusListener callBack, TaskConfig config) {
 		checkConfiguration();
-		try {
-			ReflectUtils.setFieldValue(config, "isDefault", false);
-		} catch (Exception e) {
-			e.printStackTrace();
+		if (config == null) {
+			config = getDefaultTaskConfig();
 		}
 		return new TaskEngine<>(callBack, config);
 	}
 
 	/**
+	 * init default task configuration
+	 *
+	 * @return task configuration
+	 */
+	private TaskConfig getDefaultTaskConfig() {
+		TaskConfig config = new TaskConfig();
+		config.cacheInDB = configuration.cacheInDB;
+		config.errorType = configuration.errorType;
+		config.requestExtras = configuration.requestExtras;
+		config.requestHeaders = configuration.requestHeaders;
+		config.timeOut = configuration.timeout;
+		config.retryTimes = configuration.times;
+		config.dataParser = configuration.dataParser;
+		config.requestHandler = configuration.requestHandler;
+		return config;
+	}
+
+	/**
 	 * returns a DBHelper object who can convenient and unified to manage the data.
-	 * 
+	 *
 	 * @return DBHelper
+	 *
 	 * @see DBHelper
 	 */
 	public DBHelper getDBHelper() {
@@ -271,25 +279,15 @@ public enum XParser {
 	/**
 	 * When the database does not exist, it will automatically generate a database according to the database name.
 	 * And returns a DBHelper object who can convenient and unified to manage the data.
-	 * 
+	 *
 	 * @param dbName dbName
 	 * @return DBHelper
+	 *
 	 * @see DBHelper
 	 */
 	public DBHelper getDBHelper(String dbName) {
 		checkConfiguration();
 		return DBEntryMap.getDBHelper(XConfig.sContext, dbName);
-	}
-
-	/**
-	 * Checks if XParser's configuration was initialized
-	 * 
-	 * @throws IllegalStateException if configuration wasn't initialized
-	 */
-	private void checkConfiguration() {
-		if (configuration == null) {
-			throw new IllegalStateException(ERROR_NOT_INIT);
-		}
 	}
 
 	/**
@@ -300,6 +298,7 @@ public enum XParser {
 	public void destroy() {
 		XLog.d(TAG, LOG_DESTROY);
 		configuration = null;
+		DBEntryMap.destroy();
 	}
 
 	public XConfig getXConfig() {

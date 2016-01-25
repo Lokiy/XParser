@@ -22,6 +22,7 @@ import android.view.WindowManager;
 import com.lokiy.x.inject.content.IParser;
 import com.lokiy.x.inject.content.InjectParser;
 import com.lokiy.x.net.RequestHandler;
+import com.lokiy.x.net.XRequestHandler;
 import com.lokiy.x.task.DataParser;
 import com.lokiy.x.util.CacheUtil;
 import com.lokiy.x.util.NetStatusUtils;
@@ -46,11 +47,11 @@ public class XConfig {
 
 	public static int SCREEN_WIDTH;
 	public static Context sContext;
-	Map<String, String> requestExtras;
-	Map<String, String> requestHeaders;
+	public Map<String, String> requestExtras;
+	public Map<String, String> requestHeaders;
 	Type errorType;
 	IParser userParser;
-	RequestHandler netEngine;
+	RequestHandler requestHandler;
 	boolean cacheInDB;
 	int timeout;
 	int times;
@@ -72,7 +73,7 @@ public class XConfig {
 		private Type errorType;
 		private boolean cacheInDB = true;
 		private IParser userParser;
-		private RequestHandler netEngine;
+		private RequestHandler requestHandler;
 		private int timeout = 15 * 1000;
 		private int times = 1;
 		private DataParser dataParser;
@@ -129,10 +130,10 @@ public class XConfig {
 		}
 
 		/**
-		 * Set up your own net engine.
+		 * Set up your own net handler.
 		 */
-		public Builder netEngine(RequestHandler engine) {
-			this.netEngine = engine;
+		public Builder requestHandler(RequestHandler handler) {
+			this.requestHandler = handler;
 			return this;
 		}
 
@@ -180,7 +181,7 @@ public class XConfig {
 	}
 
 	/**
-	 * create default config.
+	 * create default mConfig.
 	 * 
 	 * @param context context
 	 * @return XConfig
@@ -206,7 +207,7 @@ public class XConfig {
 		this.cacheInDB = builder.cacheInDB;
 		this.requestHeaders = builder.requestHeaders;
 		this.userParser = builder.userParser;
-		this.netEngine = builder.netEngine;
+		this.requestHandler = builder.requestHandler;
 		this.timeout = builder.timeout;
 		this.times = builder.times;
 		this.dataParser = builder.dataParser;
@@ -220,6 +221,9 @@ public class XConfig {
 			XLog.enableDefaultParserLogging();
 		} else {
 			XLog.disableDefaultParserLogging();
+		}
+		if (requestHandler == null) {
+			requestHandler = new XRequestHandler();
 		}
 		init(sContext);
 	}

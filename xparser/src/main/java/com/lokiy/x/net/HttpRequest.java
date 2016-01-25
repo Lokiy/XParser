@@ -39,23 +39,31 @@ public class HttpRequest {
 	/**
 	 * do get
 	 *
-	 * @param url     url
-	 * @param headers headers
+	 * @param url           url
+	 * @param requestParams params
 	 * @return URL response
 	 */
-	public static String sendGet(String url, int timeoutMillis, Map<String, String> headers) throws IOException {
+	public static String sendGet(String url, RequestHandler.RequestParams requestParams) throws IOException {
 		String result = "";
 		BufferedReader in = null;
 		try {
+			if (!url.contains("?")) {
+				url += "?";
+			}
+			for (String key : requestParams.params.keySet()) {
+				url += key + "=" + requestParams.params.get(key) + "&";
+			}
+			url = url.substring(0, url.length() - 1);
+
 			URL realUrl = new URL(url);
 			// open connection
 			HttpURLConnection connection = (HttpURLConnection) realUrl.openConnection();
 			connection.setRequestMethod("GET");
-			connection.setConnectTimeout(timeoutMillis);
+			connection.setConnectTimeout(requestParams.timeOut);
 			// set request headers
 			connection.setRequestProperty("Connection", "Keep-Alive");
-			for (String key : headers.keySet()) {
-				connection.setRequestProperty(key, headers.get(key));
+			for (String key : requestParams.headers.keySet()) {
+				connection.setRequestProperty(key, requestParams.headers.get(key));
 			}
 			// connect
 			connection.connect();
@@ -80,16 +88,17 @@ public class HttpRequest {
 	/**
 	 * do post
 	 *
-	 * @param url            URL
-	 * @param timeoutMillis timeout
-	 * @param params        param
-	 * @param headers       header
-	 * @param dataList      data
+	 * @param url           URL
+	 * @param requestParams param
 	 * @return response
 	 *
 	 * @throws IOException
 	 */
-	public static String sendPost(String url, int timeoutMillis, Map<String, String> params, Map<String, String> headers, List<Object> dataList) throws IOException {
+	@SuppressWarnings("ConstantConditions")
+	public static String sendPost(String url, RequestHandler.RequestParams requestParams) throws IOException {
+		Map<String, String> params = requestParams.params;
+		Map<String, String> headers = requestParams.headers;
+		List<Object> dataList = requestParams.dataList;
 		params = params == null ? new HashMap<String, String>() : params;
 		headers = headers == null ? new HashMap<String, String>() : headers;
 		dataList = dataList == null ? new ArrayList<>() : dataList;
@@ -107,8 +116,8 @@ public class HttpRequest {
 			// open connection
 			HttpURLConnection connection = (HttpURLConnection) realUrl.openConnection();
 			connection.setRequestMethod("POST");
-			connection.setConnectTimeout(timeoutMillis);
-			connection.setReadTimeout(timeoutMillis);
+			connection.setConnectTimeout(requestParams.timeOut);
+			connection.setReadTimeout(requestParams.timeOut);
 			connection.setDoOutput(true);
 			connection.setDoInput(true);
 			connection.setUseCaches(false);
