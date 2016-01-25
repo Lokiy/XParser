@@ -27,4 +27,4 @@ dependencies {
     compile 'com.google.code.gson:gson:2.4'
 }
 
-apply from: 'bintray.gradle'
+apply from: '../bintray.gradle'
