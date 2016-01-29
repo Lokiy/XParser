@@ -3,30 +3,29 @@ apply plugin: 'com.jfrog.bintray'
 
 ext {
 	bintrayRepo 		= 'maven'
-	bintrayName 		= getProperty("bintray.name")
+	bintrayName 		= getProperty("bintray.name")					// Project name in jcenter
 
 	publishedGroupId 	= getProperty("bintray.groupid") 				// Maven Group ID for the artifact
 	artifact 			= getProperty("bintray.artifact")				// Maven
-	libraryName 		= getProperty("bintray.library.name")
-
-	libraryDescription 	= getProperty("bintray.library.description")
 
 	siteUrl 			= getProperty("bintray.site.url")
 	gitUrl 				= getProperty("bintray.git.url")
 
-	libraryVersion 		= getProperty('bintray.version');
+	libraryDescription 	= getProperty("bintray.library.description")	// Project description
+	libraryName 		= getProperty("bintray.library.name")			// Project name
+	libraryVersion 		= getProperty('bintray.version');				// Project version
 
-	developerId 		= getProperty("bintray.developer.id")
-	developerName 		= getProperty("bintray.developer.name")
-	developerEmail 		= getProperty("bintray.developer.email")
+	developerId 		= getProperty("bintray.developer.id")			// Developer ID
+	developerName 		= getProperty("bintray.developer.name")			// Developer Name
+	developerEmail 		= getProperty("bintray.developer.email")		// Developer Email
 
-	licenseName 		= getProperty("bintray.license.name")
-	licenseUrl 			= getProperty("bintray.license.url")
-	allLicenses 		= [getProperty("bintray.alllicenses")]
+	licenseName 		= getProperty("bintray.license.name")			// License name
+	licenseUrl 			= getProperty("bintray.license.url")			// License url
+	allLicenses 		= [getProperty("bintray.alllicenses")]			//
 }
 
-group 					= publishedGroupId                               // Maven Group ID for the artifact
-version 				= libraryVersion
+group					= publishedGroupId								// Maven Group ID for the artifact
+version					= libraryVersion
 
 task sourcesJar(type: Jar) {
 	from android.sourceSets.main.java.srcDirs
@@ -40,6 +39,7 @@ task javadoc(type: Javadoc) {
 
 task javadocJar(type: Jar, dependsOn: javadoc) {
 	classifier = 'javadoc'
+	//noinspection GroovyAccessibility
 	from javadoc.destinationDir
 }
 
@@ -50,7 +50,7 @@ javadoc {
 		author true
 		version true
 		links "http://docs.oracle.com/javase/7/docs/api"
-		title "XParser"
+		title libraryName
 	}
 }
 artifacts {
