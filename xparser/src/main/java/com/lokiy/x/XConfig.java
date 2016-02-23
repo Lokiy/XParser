@@ -24,7 +24,6 @@ import com.lokiy.x.inject.content.InjectParser;
 import com.lokiy.x.net.RequestHandler;
 import com.lokiy.x.net.XRequestHandler;
 import com.lokiy.x.task.DataParser;
-import com.lokiy.x.util.CacheUtil;
 import com.lokiy.x.util.NetStatusUtils;
 
 import java.lang.reflect.Type;
@@ -52,7 +51,6 @@ public class XConfig {
 	Type errorType;
 	IParser userParser;
 	RequestHandler requestHandler;
-	boolean cacheInDB;
 	int timeout;
 	int times;
 	DataParser dataParser;
@@ -71,7 +69,6 @@ public class XConfig {
 		private Context context;
 		private boolean writeLogs = BuildConfig.DEBUG;
 		private Type errorType;
-		private boolean cacheInDB = true;
 		private IParser userParser;
 		private RequestHandler requestHandler;
 		private int timeout = 15 * 1000;
@@ -101,15 +98,6 @@ public class XConfig {
 		/** It' will be used this analysis when parsing failed */
 		public Builder errorType(Type errorType) {
 			this.errorType = errorType;
-			return this;
-		}
-
-		/**
-		 * True, cache in the inside of the DB but efficiency low. False, cache in the inside of the File but efficiency
-		 * high
-		 */
-		public Builder cacheInDB(boolean cacheInDB) {
-			this.cacheInDB = cacheInDB;
 			return this;
 		}
 
@@ -204,7 +192,6 @@ public class XConfig {
 		boolean writeLogs = builder.writeLogs;
 		this.requestExtras = builder.requestExtras;
 		this.errorType = builder.errorType;
-		this.cacheInDB = builder.cacheInDB;
 		this.requestHeaders = builder.requestHeaders;
 		this.userParser = builder.userParser;
 		this.requestHandler = builder.requestHandler;
@@ -230,7 +217,6 @@ public class XConfig {
 
 	@SuppressWarnings("deprecation")
 	private void init(Context context) {
-		CacheUtil.init(context);
 		NetStatusUtils.init(context);
 		sContext = context.getApplicationContext();
 		WindowManager wm = (WindowManager) sContext.getSystemService(Context.WINDOW_SERVICE);

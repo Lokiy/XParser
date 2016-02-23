@@ -29,8 +29,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * @author Luki
  */
+@SuppressWarnings("ALL")
 public class WidgetUtils {
-	private static Map<ResType, Integer> mResDefaultMap = new HashMap<ResType, Integer>();
+	private static Map<ResType, Integer> mResDefaultMap = new HashMap<>();
 
 	private static final AtomicInteger sNextGeneratedId = new AtomicInteger(1);
 
@@ -59,7 +60,6 @@ public class WidgetUtils {
 	 * @param position position
 	 * @return position
 	 */
-	@SuppressWarnings("rawtypes")
 	public static int getDataPosition(AdapterView parent, int position) {
 		if (parent instanceof ListView) {
 			ListView listView = (ListView) parent;

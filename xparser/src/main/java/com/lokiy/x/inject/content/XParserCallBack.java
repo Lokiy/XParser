@@ -30,5 +30,5 @@ public interface XParserCallBack extends ParserCallBack {
 	 * @param key content description of view
 	 * @param v view
 	 */
-	void ignoreView(String key, View v);
+	void onIgnoreView(String key, View v);
 }

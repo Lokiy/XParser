@@ -78,28 +78,28 @@ public abstract class InjectExpandableAdapter<Group extends XExpandableAdapter<C
 		XParser.INSTANCE.parse(this, getGroup(groupPosition), convertView, new XParserCallBack(){
 
 			@Override
-			public void failedInjectView(String key, View view) {
-				failedInjectGroupView(key, view, groupPosition, isExpanded);
+			public void OnFailedInjectView(String key, View view) {
+				onFailedInjectGroupView(key, view, groupPosition, isExpanded);
 			}
 
 			@Override
-			public void configViews(InjectHolder holder) {
-				configGroupViews(holder, groupPosition, isExpanded);
+			public void onBindInjectHolder(InjectHolder holder) {
+				onBindGroupViews(holder, groupPosition, isExpanded);
 			}
 
 			@Override
-			public void ignoreView(String key, View view) {
-				ignoreGroupView(key, view, groupPosition, isExpanded);
+			public void onIgnoreView(String key, View view) {
+				onIgnoreGroupView(key, view, groupPosition, isExpanded);
 			}
 		});
 		return convertView;
 	}
 
-	protected void ignoreGroupView(String key, View view, int position, boolean isExpanded) {}
+	protected void onIgnoreGroupView(String key, View view, int position, boolean isExpanded) {}
 
-	protected void configGroupViews(InjectHolder holder, int position, boolean isExpanded) {}
+	protected void onBindGroupViews(InjectHolder holder, int position, boolean isExpanded) {}
 
-	protected void failedInjectGroupView(String key, View view, int position, boolean isExpanded) {}
+	protected void onFailedInjectGroupView(String key, View view, int position, boolean isExpanded) {}
 
 	protected void restoreGroupItem(int groupPosition, View convertView) {}
 
@@ -120,18 +120,18 @@ public abstract class InjectExpandableAdapter<Group extends XExpandableAdapter<C
 		XParser.INSTANCE.parse(this, getChild(groupPosition, childPosition), convertView, new XParserCallBack(){
 
 			@Override
-			public void failedInjectView(String key, View view) {
-				failedInjectChildView(key, view, groupPosition, childPosition, isLastChild);
+			public void OnFailedInjectView(String key, View view) {
+				onFailedInjectChildView(key, view, groupPosition, childPosition, isLastChild);
 			}
 
 			@Override
-			public void configViews(InjectHolder holder) {
-				configChildViews(holder, groupPosition, childPosition, isLastChild);
+			public void onBindInjectHolder(InjectHolder holder) {
+				onBindChildViews(holder, groupPosition, childPosition, isLastChild);
 			}
 
 			@Override
-			public void ignoreView(String key, View view) {
-				ignoreChildView(key, view, groupPosition, childPosition, isLastChild);
+			public void onIgnoreView(String key, View view) {
+				onIgnoreChildView(key, view, groupPosition, childPosition, isLastChild);
 			}
 		});
 		return convertView;
@@ -141,11 +141,11 @@ public abstract class InjectExpandableAdapter<Group extends XExpandableAdapter<C
 
 	protected abstract int childLayoutResId(boolean isLastChild);
 
-	protected void ignoreChildView(String key, View view, int groupPosition, int childPosition, boolean isLastChild) {}
+	protected void onIgnoreChildView(String key, View view, int groupPosition, int childPosition, boolean isLastChild) {}
 
-	protected void configChildViews(InjectHolder holder, int groupPosition, int childPosition, boolean isLastChild) {}
+	protected void onBindChildViews(InjectHolder holder, int groupPosition, int childPosition, boolean isLastChild) {}
 
-	protected void failedInjectChildView(String key, View view, int groupPosition, int childPosition, boolean isLastChild) {}
+	protected void onFailedInjectChildView(String key, View view, int groupPosition, int childPosition, boolean isLastChild) {}
 
 	@Override
 	public boolean isChildSelectable(int groupPosition, int childPosition) {

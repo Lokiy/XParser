@@ -17,10 +17,10 @@
 package com.lokiy.x;
 
 import com.lokiy.x.task.AsyncResult;
-import com.lokiy.x.task.TaskCallBack;
+import com.lokiy.x.task.OnTaskCallBack;
 import com.lokiy.x.task.TaskConfig;
 import com.lokiy.x.task.TaskParams;
-import com.lokiy.x.task.TaskStatusListener;
+import com.lokiy.x.task.OnTaskStatusListener;
 import com.lokiy.x.task.base.AsyncTask;
 
 import java.io.Serializable;
@@ -36,9 +36,9 @@ import java.io.Serializable;
 public abstract class XTask<T extends Serializable> extends AsyncTask<TaskParams<T>, Void, AsyncResult<T>> {
 
 	protected TaskConfig mConfig;
-	private TaskStatusListener mCallBack;
+	private OnTaskStatusListener mCallBack;
 
-	public XTask(TaskStatusListener callBack, TaskConfig config) {
+	public XTask(OnTaskStatusListener callBack, TaskConfig config) {
 		this.mCallBack = callBack;
 		this.mConfig = config;
 	}
@@ -67,5 +67,5 @@ public abstract class XTask<T extends Serializable> extends AsyncTask<TaskParams
 		super.onCancelled();
 	}
 
-	public abstract TaskCallBack<AsyncResult<T>> getListener();
+	public abstract OnTaskCallBack<AsyncResult<T>> getListener();
 }

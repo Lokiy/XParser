@@ -42,11 +42,6 @@ public final class TaskConfig  implements Serializable{
 	public Type errorType;
 	public DataParser dataParser;
 	public RequestHandler requestHandler;
-	/**
-	 * True, cache in the inside of the DB but efficiency low. False, cache in the inside of the File but efficiency
-	 * high
-	 */
-	public boolean cacheInDB = true;
 	/** set up task time out. */
 	public int timeOut;
 	/** set up task retry times */

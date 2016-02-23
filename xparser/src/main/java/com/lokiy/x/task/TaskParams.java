@@ -30,7 +30,7 @@ public final class TaskParams<T> {
 	private static int R;
 	final String TAG = "Task-" + R++;
 	final String url;
-	TaskCallBack<AsyncResult<T>> listener;
+	OnTaskCallBack<AsyncResult<T>> listener;
 	Type type;
 	Method method = Method.POST;
 	Map<String, String> headers;
@@ -150,7 +150,7 @@ public final class TaskParams<T> {
 		private Type type;
 		private boolean isParse = true;
 		private Method method = Method.POST;
-		private TaskCallBack<AsyncResult<T>> listener;
+		private OnTaskCallBack<AsyncResult<T>> listener;
 		private String url;
 
 		public Builder(String url) {
@@ -162,7 +162,7 @@ public final class TaskParams<T> {
 		 *
 		 * @return Builder<T>
 		 */
-		public Builder<T> listener(TaskCallBack<AsyncResult<T>> listener) {
+		public Builder<T> listener(OnTaskCallBack<AsyncResult<T>> listener) {
 			this.listener = listener;
 			return this;
 		}

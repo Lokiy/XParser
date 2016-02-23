@@ -25,15 +25,15 @@ import com.lokiy.x.inject.content.XParserCallBack;
  */
 public class SimpleParserCallBack implements XParserCallBack {
 
-	public void failedInjectView(String key, View v) {
+	public void OnFailedInjectView(String key, View v) {
 
 	}
 
-	public void configViews(InjectHolder holder) {
+	public void onBindInjectHolder(InjectHolder holder) {
 
 	}
 
-	public void ignoreView(String key, View v) {
+	public void onIgnoreView(String key, View v) {
 
 	}
 

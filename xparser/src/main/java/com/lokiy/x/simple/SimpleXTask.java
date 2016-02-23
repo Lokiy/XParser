@@ -22,9 +22,9 @@ import com.lokiy.x.XTask;
 import com.lokiy.x.task.AsyncResult;
 import com.lokiy.x.task.AsyncResult.LoadFrom;
 import com.lokiy.x.task.AsyncResult.ResultStatus;
-import com.lokiy.x.task.TaskCallBack;
+import com.lokiy.x.task.OnTaskCallBack;
 import com.lokiy.x.task.TaskParams;
-import com.lokiy.x.task.TaskStatusListener;
+import com.lokiy.x.task.OnTaskStatusListener;
 
 import java.io.Serializable;
 import java.lang.reflect.Type;
@@ -36,7 +36,7 @@ import java.util.Map;
  * @author Luki
  */
 @SuppressWarnings("unchecked")
-public class SimpleXTask<T extends Serializable> implements TaskStatusListener {
+public class SimpleXTask<T extends Serializable> implements OnTaskStatusListener {
 	private boolean isTasking;
 	protected String TAG;
 	private XTask<T> mCurrentTask;
@@ -88,7 +88,7 @@ public class SimpleXTask<T extends Serializable> implements TaskStatusListener {
 		isTasking = false;
 	}
 
-	public static abstract class SimpleTaskBack<T> implements TaskCallBack<AsyncResult<T>> {
+	public static abstract class SimpleTaskBack<T> implements OnTaskCallBack<AsyncResult<T>> {
 
 		public void onResult(AsyncResult<T> result) {
 			if (result.status == ResultStatus.SUCCESS) {

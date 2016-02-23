@@ -29,10 +29,10 @@ public interface ParserCallBack {
 	 * @param key content description of view
 	 * @param v view
 	 */
-	void failedInjectView(String key, View v);
+	void OnFailedInjectView(String key, View v);
 	/**
 	 * when all the views be parsed, the method will be invoked.
 	 * @param holder holder
 	 */
-	void configViews(InjectHolder holder);
+	void onBindInjectHolder(InjectHolder holder);
 }

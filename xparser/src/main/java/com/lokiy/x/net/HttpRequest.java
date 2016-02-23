@@ -103,14 +103,7 @@ public class HttpRequest {
 		headers = headers == null ? new HashMap<String, String>() : headers;
 		dataList = dataList == null ? new ArrayList<>() : dataList;
 
-		DataOutputStream dos = null;
-		BufferedReader in = null;
-		PrintWriter out = null;
 		String result = "";
-
-		String boundary = System.currentTimeMillis() + "";
-		String end = "\r\n";
-		String twoHyphens = "--";
 		try {
 			URL realUrl = new URL(url);
 			// open connection
@@ -126,55 +119,10 @@ public class HttpRequest {
 			for (String key : headers.keySet()) {
 				connection.setRequestProperty(key, headers.get(key));
 			}
-
-			StringBuilder param = new StringBuilder();
 			if (!dataList.isEmpty()) {
-				connection.setRequestProperty("Content-Type", "multipart/form-data;boundary=" + boundary);
-				connection.connect();
-				dos = new DataOutputStream(connection.getOutputStream());
-				for (int i = 0; i < dataList.size(); i++) {
-					Object obj = dataList.get(i);
-					if (obj instanceof File || obj instanceof InputStream) {
-						InputStream fis;
-						if (obj instanceof File) {
-							fis = new FileInputStream((File) obj);
-						} else {
-							fis = (InputStream) obj;
-						}
-						dataList.set(i, fis);
-						String p = twoHyphens + boundary + end + "Content-Type: application/octet-stream" + end + "Content-Disposition: form-data; filename=\"file" + i + "\"; name=\"file" + i + "\"" + end + end;
-
-						byte[] data = new byte[fis.available()];
-						if (fis.read(data) != -1) {
-							dos.writeBytes(p);
-							dos.write(data);
-						}
-
-					} else if (obj instanceof String) {
-						dos.write(((String) obj).getBytes());
-					}
-				}
-
-				if (!params.isEmpty()) {
-					for (String key : params.keySet()) {
-						param.append(end).append(twoHyphens).append(boundary).append(end).append("Content-Type: text/plain").append(end).append("Content-Disposition: form-data; name=\"").append(key).append("\"").append(end).append(end).append(URLEncoder.encode(params.get(key), "UTF-8")).append(end).append(twoHyphens).append(boundary).append(twoHyphens);
-					}
-				}
-				dos.writeBytes(param.toString());
-				dos.flush();
+				new DataPostHandler(params, dataList, connection).invoke();
 			} else {
-				connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-				dos = new DataOutputStream(connection.getOutputStream());
-
-				out = new PrintWriter(connection.getOutputStream());
-				for (String key : params.keySet()) {
-					param.append(key).append("=").append(URLEncoder.encode(params.get(key), "UTF-8")).append("&");
-				}
-				if (param.length() > 0) {
-					param.deleteCharAt(param.length() - 1);
-				}
-				out.print(param.toString());
-				out.flush();
+				new StringPostHandler(params, connection).invoke();
 			}
 			if (connection.getResponseCode() == 200) {
 				InputStream is = connection.getInputStream();
@@ -187,21 +135,12 @@ public class HttpRequest {
 			}
 		} finally {// close input steam
 			try {
-				if (dos != null) {
-					dos.close();
-				}
 				if (dataList.isEmpty()) {
 					for (Object fis : dataList) {
 						if (fis instanceof InputStream) {
 							((InputStream) fis).close();
 						}
 					}
-				}
-				if (in != null) {
-					in.close();
-				}
-				if (out != null) {
-					out.close();
 				}
 			} catch (IOException ex) {
 				ex.printStackTrace();
@@ -210,4 +149,118 @@ public class HttpRequest {
 		return result;
 	}
 
+	/**
+	 *
+	 */
+	private static class DataPostHandler {
+		private final List<Object> dataList;
+		private final Map<String, String> params;
+		private final HttpURLConnection connection;
+		String boundary = System.currentTimeMillis() + "";
+		String end = "\r\n";
+		String twoHyphens = "--";
+		private DataOutputStream dos;
+
+		public DataPostHandler(Map<String, String> params, List<Object> dataList, HttpURLConnection connection) {
+			this.params = params;
+			this.dataList = dataList;
+			this.connection = connection;
+		}
+
+		public DataPostHandler invoke() throws IOException {
+			StringBuilder param = new StringBuilder();
+			connection.setRequestProperty("Content-Type", "multipart/form-data;boundary=" + boundary);
+			connection.connect();
+			dos = new DataOutputStream(connection.getOutputStream());
+			for (int i = 0; i < dataList.size(); i++) {
+				Object obj = dataList.get(i);
+				if (obj instanceof File || obj instanceof InputStream) {
+					InputStream fis;
+					if (obj instanceof File) {
+						fis = new FileInputStream((File) obj);
+					} else {
+						fis = (InputStream) obj;
+					}
+					dataList.set(i, fis);
+					param.append(twoHyphens).append(boundary).append(end)
+							.append("Content-Type: application/octet-stream").append(end)
+							.append("Content-Disposition: form-data; filename=\"file").append(i).append("\"; name=\"file").append(i).append("\"").append(end)
+							.append(end);
+					byte[] data = new byte[fis.available()];
+					if (fis.read(data) != -1) {
+						dos.writeBytes(param.toString());
+						dos.write(data);
+					}
+					try {
+						fis.close();
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				} else if (obj instanceof String) {
+					dos.write(((String) obj).getBytes());
+				}
+			}
+
+			if (!params.isEmpty()) {
+				param.setLength(0);
+				for (String key : params.keySet()) {
+					param.append(end)
+							.append(twoHyphens).append(boundary).append(end)
+							.append("Content-Type: text/plain").append(end)
+							.append("Content-Disposition: form-data; name=\"").append(key).append("\"").append(end)
+							.append(end).append(URLEncoder.encode(params.get(key), "UTF-8")).append(end)
+							.append(twoHyphens).append(boundary).append(twoHyphens);
+				}
+			}
+			dos.writeBytes(param.toString());
+			dos.flush();
+
+			try {
+				dos.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			return this;
+		}
+	}
+
+	private static class StringPostHandler {
+		private Map<String, String> params;
+		private DataOutputStream dos;
+		private PrintWriter out;
+		private HttpURLConnection connection;
+
+		public StringPostHandler(Map<String, String> params, HttpURLConnection connection) {
+			this.params = params;
+			this.connection = connection;
+		}
+
+		public StringPostHandler invoke() throws IOException {
+			StringBuilder param = new StringBuilder();
+			connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+			dos = new DataOutputStream(connection.getOutputStream());
+
+			out = new PrintWriter(connection.getOutputStream());
+			for (String key : params.keySet()) {
+				param.append(key).append("=").append(URLEncoder.encode(params.get(key), "UTF-8")).append("&");
+			}
+			if (param.length() > 0) {
+				param.deleteCharAt(param.length() - 1);
+			}
+			out.print(param.toString());
+			out.flush();
+			try {
+				out.close();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+
+			try {
+				dos.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			return this;
+		}
+	}
 }

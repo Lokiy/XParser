@@ -26,8 +26,8 @@ import com.lokiy.x.inject.content.InjectHolder;
 import com.lokiy.x.inject.content.InjectParser;
 import com.lokiy.x.inject.content.ParserCallBack;
 import com.lokiy.x.task.TaskConfig;
-import com.lokiy.x.task.TaskEngine;
-import com.lokiy.x.task.TaskStatusListener;
+import com.lokiy.x.task.TaskHandler;
+import com.lokiy.x.task.OnTaskStatusListener;
 import com.lokiy.x.task.base.AsyncTask;
 
 import java.io.Serializable;
@@ -229,7 +229,7 @@ public enum XParser {
 	 * @param callBack callBack
 	 * @return XTask
 	 */
-	public <T extends Serializable> XTask<T> getXTask(TaskStatusListener callBack) {
+	public <T extends Serializable> XTask<T> getXTask(OnTaskStatusListener callBack) {
 		return getXTask(callBack, null);
 	}
 
@@ -239,12 +239,12 @@ public enum XParser {
 	 * @param callBack callBack
 	 * @return XTask
 	 */
-	public <T extends Serializable> XTask<T> getXTask(TaskStatusListener callBack, TaskConfig config) {
+	public <T extends Serializable> XTask<T> getXTask(OnTaskStatusListener callBack, TaskConfig config) {
 		checkConfiguration();
 		if (config == null) {
 			config = getDefaultTaskConfig();
 		}
-		return new TaskEngine<>(callBack, config);
+		return new TaskHandler<>(callBack, config);
 	}
 
 	/**
@@ -254,7 +254,6 @@ public enum XParser {
 	 */
 	private TaskConfig getDefaultTaskConfig() {
 		TaskConfig config = new TaskConfig();
-		config.cacheInDB = configuration.cacheInDB;
 		config.errorType = configuration.errorType;
 		config.requestExtras = configuration.requestExtras;
 		config.requestHeaders = configuration.requestHeaders;

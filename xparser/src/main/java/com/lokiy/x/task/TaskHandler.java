@@ -25,7 +25,6 @@ import com.lokiy.x.net.RequestHandler;
 import com.lokiy.x.task.AsyncResult.LoadFrom;
 import com.lokiy.x.task.AsyncResult.ResultStatus;
 import com.lokiy.x.task.base.AsyncTask;
-import com.lokiy.x.util.CacheUtil;
 import com.lokiy.x.util.MD5;
 import com.lokiy.x.util.NetStatusUtils;
 
@@ -38,13 +37,12 @@ import java.util.Map;
  * @param <T>
  * @author Luki
  */
-public class TaskEngine<T extends Serializable> extends XTask<T> {
+public class TaskHandler<T extends Serializable> extends XTask<T> {
 
 	private static final String CACHE_DATA_DB = "cache_data";
-	private static final CacheUtil mCacheUtil = CacheUtil.getInstance();
 	private TaskParams<T> mParams;
 
-	public TaskEngine(TaskStatusListener callBack, TaskConfig config) {
+	public TaskHandler(OnTaskStatusListener callBack, TaskConfig config) {
 		super(callBack, config);
 	}
 
@@ -59,7 +57,7 @@ public class TaskEngine<T extends Serializable> extends XTask<T> {
 		String key = MD5.md5s(generateKey);
 		long millis = System.currentTimeMillis();
 		try {
-			if ((NetStatusUtils.isNetworkConnected() && (mParams.isForceRefresh || isCacheDataFailure(key, mParams.cacheTime)))) {
+			if ((NetStatusUtils.isNetworkConnected() && (mParams.isForceRefresh || isCacheDataFailure(key)))) {
 				String resultString = null;
 				try {
 					RequestHandler.RequestParams requestParams = new RequestHandler.RequestParams();
@@ -84,9 +82,7 @@ public class TaskEngine<T extends Serializable> extends XTask<T> {
 					log(e.toString(), millis);
 				}
 				if (result.status == ResultStatus.SUCCESS && mParams.isAllowLoadCache) {
-					if (!mConfig.cacheInDB) {
-						saveObject(result, key);
-					} else if (resultString != null) {
+					if (resultString != null) {
 						saveObject(resultString, key);
 					}
 				}
@@ -126,27 +122,22 @@ public class TaskEngine<T extends Serializable> extends XTask<T> {
 	 * Is cache data Failure
 	 *
 	 * @param key       key
-	 * @param cacheTime cache time
 	 * @return true Failure
 	 */
-	private boolean isCacheDataFailure(String key, long cacheTime) {
+	private boolean isCacheDataFailure(String key) {
 		boolean isFailure;
 		if (!mParams.isAllowLoadCache) {
 			return true;
 		}
-		if (mConfig.cacheInDB) {
-			DBSelection<TaskResult> selection = new DBSelection<>();
-			selection.selection = "key=? and " + DBUtils.TIME_COLUMN + ">?";
-			selection.selectionArgs = new String[]{
-					key,
-					String.valueOf(System.currentTimeMillis() - mParams.cacheTime)
-			};
-			DBHelper create = XParser.INSTANCE.getDBHelper(CACHE_DATA_DB);
-			TaskResult results = create.findBySelection(TaskResult.class, selection);
-			isFailure = results == null;
-		} else {
-			isFailure = mCacheUtil.isCacheDataFailure(key, cacheTime);
-		}
+		DBSelection<TaskResult> selection = new DBSelection<>();
+		selection.selection = "key=? and " + DBUtils.TIME_COLUMN + ">?";
+		selection.selectionArgs = new String[]{
+				key,
+				String.valueOf(System.currentTimeMillis() - mParams.cacheTime)
+		};
+		DBHelper create = XParser.INSTANCE.getDBHelper(CACHE_DATA_DB);
+		TaskResult results = create.findBySelection(TaskResult.class, selection);
+		isFailure = results == null;
 		return isFailure;
 	}
 
@@ -223,15 +214,11 @@ public class TaskEngine<T extends Serializable> extends XTask<T> {
 	}
 
 	private void saveObject(Serializable result, String key) {
-		if (mConfig.cacheInDB) {
-			DBHelper create = XParser.INSTANCE.getDBHelper(CACHE_DATA_DB);
-			TaskResult bean = new TaskResult();
-			bean.setKey(key);
-			bean.setValue(result.toString());
-			create.save(bean);
-		} else {
-			mCacheUtil.saveObject(result, key);
-		}
+		DBHelper create = XParser.INSTANCE.getDBHelper(CACHE_DATA_DB);
+		TaskResult bean = new TaskResult();
+		bean.setKey(key);
+		bean.setValue(result.toString());
+		create.save(bean);
 	}
 
 	/**
@@ -246,26 +233,17 @@ public class TaskEngine<T extends Serializable> extends XTask<T> {
 	private AsyncResult<T> readObject(String key) throws Exception {
 
 		AsyncResult<T> result = new AsyncResult<>();
-		if (mConfig.cacheInDB) {
-			DBSelection<TaskResult> selection = new DBSelection<>();
-			selection.selection = "key=?";
-			selection.selectionArgs = new String[]{key};
-			DBHelper create = XParser.INSTANCE.getDBHelper(CACHE_DATA_DB);
-			TaskResult results = create.findBySelection(TaskResult.class, selection);
-			if (results != null) {
-				String value = results.getValue();
-				parse(result, value);
-			}
-		} else {
-			result = (AsyncResult<T>) mCacheUtil.readObject(key);
+		DBSelection<TaskResult> selection = new DBSelection<>();
+		selection.selection = "key=?";
+		selection.selectionArgs = new String[]{key};
+		DBHelper create = XParser.INSTANCE.getDBHelper(CACHE_DATA_DB);
+		TaskResult results = create.findBySelection(TaskResult.class, selection);
+		if (results != null) {
+			String value = results.getValue();
+			parse(result, value);
 		}
 
-		if (result == null) {
-			result = new AsyncResult<>();
-			result.status = ResultStatus.FAILED;
-		} else {
-			result.loadedFrom = LoadFrom.CACHE;
-		}
+		result.loadedFrom = LoadFrom.CACHE;
 		return result;
 	}
 
@@ -280,7 +258,7 @@ public class TaskEngine<T extends Serializable> extends XTask<T> {
 	}
 
 	@Override
-	public final TaskCallBack<AsyncResult<T>> getListener() {
+	public final OnTaskCallBack<AsyncResult<T>> getListener() {
 		return mParams.listener;
 	}
 }

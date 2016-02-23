@@ -16,14 +16,17 @@
 package com.lokiy.x.task;
 
 
-/**
- * task callback
+/***
+ * task status callback
  * 
  * @author Luki
- * @param <T>
+ * @version 1.0 2014-1-24
+ * @since 1.0
  */
-public interface TaskCallBack<T> {
-	void onResult(T result);
-	
+public interface OnTaskStatusListener {
+	void onEnd();
+
+	void onStart();
+
 	void onCancel();
 }

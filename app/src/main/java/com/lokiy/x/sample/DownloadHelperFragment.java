@@ -22,6 +22,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.Toast;
 
 import com.kince.indicator.widget.IndicatorProgressBar;
 
@@ -34,7 +35,6 @@ import com.lokiy.x.util.DownloadHelper;
  * Version:1
  */
 public class DownloadHelperFragment extends Fragment implements DownloadHelper.OnDownloadProgressUpgradeListener {
-
 
 	private IndicatorProgressBar mProgress;
 
@@ -79,5 +79,13 @@ public class DownloadHelperFragment extends Fragment implements DownloadHelper.O
 	@Override
 	public void onDownloadProgressUpgrade(long current, long maxSize) {
 		mProgress.setProgress((int) (current * 100f / maxSize));
+	}
+
+	/**
+	 * when download failed, it will be invoked.
+	 */
+	@Override
+	public void onDownloadFailed() {
+		Toast.makeText(getActivity(), "下载失败！", Toast.LENGTH_LONG).show();
 	}
 }

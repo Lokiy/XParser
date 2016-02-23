@@ -72,14 +72,14 @@ public class InjectParser implements IParser {
 						v.setOnLongClickListener(click);
 					}
 				} else if (callBack instanceof XParserCallBack) {
-					((XParserCallBack) callBack).ignoreView(key, v);
+					((XParserCallBack) callBack).onIgnoreView(key, v);
 				}
 				XLog.d(TAG, "onAttachEnd : Key -> %s, holder -> %s, View -> %s\n", key, ph.toString(), v.getClass().getSimpleName());
 			}
 		}
 
 		if (callBack != null) {
-			callBack.configViews(holder);
+			callBack.onBindInjectHolder(holder);
 		}
 	}
 
@@ -161,7 +161,7 @@ public class InjectParser implements IParser {
 			attachValue(v, ph, value);
 		} else {
 			if (callBack != null) {
-				callBack.failedInjectView(key, v);
+				callBack.OnFailedInjectView(key, v);
 			}
 		}
 	}

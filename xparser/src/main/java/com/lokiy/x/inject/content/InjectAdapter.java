@@ -44,8 +44,8 @@ import static com.lokiy.x.XConfig.SCREEN_WIDTH;
  * See more<BR>
  * {@link #nameGenerator(int)}<BR>
  * resource name generate rule. {@link #defaultLayoutResId()}<BR>
- * default layout resource id {@link #failedInjectView(String, View, int)}<BR>
- * parsed failed view callback {@link #configViews(InjectHolder, int)}<BR>
+ * default layout resource id {@link #onFailedInjectView(String, View, int)}<BR>
+ * parsed failed view callback {@link #onBindInjectHolder(InjectHolder, int)}<BR>
  * other
  *
  * @author Luki
@@ -334,13 +334,13 @@ public class InjectAdapter<T> extends BaseAdapter implements XAdapter<T> {
 		XParser.INSTANCE.parse(this, getItem(position), convertView, new ParserCallBack() {
 
 			@Override
-			public void failedInjectView(String key, View v) {
-				InjectAdapter.this.failedInjectView(key, v, position);
+			public void OnFailedInjectView(String key, View v) {
+				InjectAdapter.this.onFailedInjectView(key, v, position);
 			}
 
 			@Override
-			public void configViews(InjectHolder holder) {
-				InjectAdapter.this.configViews(holder, position);
+			public void onBindInjectHolder(InjectHolder holder) {
+				InjectAdapter.this.onBindInjectHolder(holder, position);
 			}
 		});
 		return convertView;
@@ -363,7 +363,7 @@ public class InjectAdapter<T> extends BaseAdapter implements XAdapter<T> {
 	 * @param v v
 	 * @param position position
 	 */
-	public void failedInjectView(String key, View v, int position) {}
+	public void onFailedInjectView(String key, View v, int position) {}
 
 	/**
 	 * Layout item name generator.
@@ -389,7 +389,7 @@ public class InjectAdapter<T> extends BaseAdapter implements XAdapter<T> {
 	 * @param holder holder
 	 * @param position position
 	 */
-	public void configViews(InjectHolder holder, int position) {}
+	public void onBindInjectHolder(InjectHolder holder, int position) {}
 
 	/**
 	 * item long click.
