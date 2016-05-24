@@ -17,6 +17,7 @@
 package com.lokiy.x;
 
 import android.app.Activity;
+import android.app.Fragment;
 import android.graphics.drawable.Drawable;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -27,6 +28,7 @@ import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.lokiy.x.inject.content.XImage;
 import com.lokiy.x.inject.view.annotation.ListenerInject.ListenerType;
 
 import static com.lokiy.x.inject.view.InjectEventControl.linkedToMethod;
@@ -34,6 +36,7 @@ import static com.lokiy.x.inject.view.InjectEventControl.linkedToMethod;
 /**
  * @author Luki
  */
+@SuppressWarnings("unused")
 public class XQuery {
 	private static final String TAG = XQuery.class.getSimpleName();
 	private View mContainer;
@@ -46,6 +49,14 @@ public class XQuery {
 			target = activity;
 		} else
 			throw new IllegalArgumentException("activity is null");
+	}
+
+	public XQuery(android.support.v4.app.Fragment fragment) {
+		if (fragment != null && fragment.getView() != null) {
+			mContainer = fragment.getView();
+			target = fragment;
+		} else
+			throw new IllegalArgumentException("fragment is null or fragment.getView is null");
 	}
 
 	public XQuery(View view, Object target) {
@@ -62,7 +73,16 @@ public class XQuery {
 	public XQuery id(int id) {
 		view = mContainer.findViewById(id);
 		if (view == null) {
-			XLog.w(TAG, "---------------------------- id(" + id + ") is not exist in this view or activity ----------------------------");
+			XLog.w(TAG, "---------------------------- id(" + id + ") is not exist in this view ----------------------------");
+			view = new View(mContainer.getContext());
+		}
+		return this;
+	}
+
+	public XQuery content(String content) {
+		view = XParser.INSTANCE.parseView(mContainer).get(content);
+		if (view == null) {
+			XLog.w(TAG, "---------------------------- contentDescription(" + content + ") is not exist in this view  ----------------------------");
 			view = new View(mContainer.getContext());
 		}
 		return this;
@@ -131,6 +151,13 @@ public class XQuery {
 		return this;
 	}
 
+	public XQuery image(String url) {
+		if (view instanceof XImage) {
+			((XImage) view).loadImageByURL(url);
+		}
+		return this;
+	}
+
 	public XQuery image(Drawable drawable) {
 		if (view instanceof ImageView) {
 			((ImageView) view).setImageDrawable(drawable);
@@ -156,7 +183,8 @@ public class XQuery {
 		return this;
 	}
 
-	public View view() {
-		return view;
+	public <T extends View> T view() {
+		//noinspection unchecked
+		return (T) view;
 	}
 }

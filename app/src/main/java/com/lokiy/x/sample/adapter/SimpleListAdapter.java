@@ -64,7 +64,7 @@ public class SimpleListAdapter extends SimpleAdapter<String> {
 	}
 
 	@Override
-	public void configViews(InjectHolder holder, final int position) {
+	public void onBindInjectHolder(InjectHolder holder, final int position) {
 		TextView v = holder.findViewByString(R.string.v_this);
 		Random r = new Random();
 		int red = r.nextInt(255);

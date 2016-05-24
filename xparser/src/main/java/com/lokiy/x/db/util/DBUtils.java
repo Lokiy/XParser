@@ -411,7 +411,7 @@ public class DBUtils {
 					l.addAll(selectBySelection(clazz1, dbSelection));
 				}
 				field.set(t, l);
-			} else {
+			} else if(field.getType() == clazz1) {
 				dbSelection.selectionArgs = new String[]{cv};
 				List<T> l = selectBySelection(clazz1, dbSelection);
 				if (l.isEmpty()) {
@@ -991,6 +991,8 @@ public class DBUtils {
 
 		c.close();
 	}
+
+
 
 	private void addColumn(StringBuilder newColumns, StringBuilder originalColumns, String columnName, String originalColumn) {
 		newColumns.append(",");

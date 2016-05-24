@@ -50,8 +50,8 @@ public class HttpRequest {
 			if (!url.contains("?")) {
 				url += "?";
 			}
-			for (String key : requestParams.params.keySet()) {
-				url += key + "=" + requestParams.params.get(key) + "&";
+			for (String key : requestParams.getParams().keySet()) {
+				url += key + "=" + requestParams.getParams().get(key) + "&";
 			}
 			url = url.substring(0, url.length() - 1);
 
@@ -62,8 +62,8 @@ public class HttpRequest {
 			connection.setConnectTimeout(requestParams.timeOut);
 			// set request headers
 			connection.setRequestProperty("Connection", "Keep-Alive");
-			for (String key : requestParams.headers.keySet()) {
-				connection.setRequestProperty(key, requestParams.headers.get(key));
+			for (String key : requestParams.getHeaders().keySet()) {
+				connection.setRequestProperty(key, requestParams.getHeaders().get(key));
 			}
 			// connect
 			connection.connect();
@@ -96,9 +96,9 @@ public class HttpRequest {
 	 */
 	@SuppressWarnings("ConstantConditions")
 	public static String sendPost(String url, RequestHandler.RequestParams requestParams) throws IOException {
-		Map<String, String> params = requestParams.params;
-		Map<String, String> headers = requestParams.headers;
-		List<Object> dataList = requestParams.dataList;
+		Map<String, String> params = requestParams.getParams();
+		Map<String, String> headers = requestParams.getHeaders();
+		List<Object> dataList = requestParams instanceof RequestHandler.DataRequestParams ? ((RequestHandler.DataRequestParams) requestParams).getDataList() : null;
 		params = params == null ? new HashMap<String, String>() : params;
 		headers = headers == null ? new HashMap<String, String>() : headers;
 		dataList = dataList == null ? new ArrayList<>() : dataList;
@@ -182,10 +182,7 @@ public class HttpRequest {
 						fis = (InputStream) obj;
 					}
 					dataList.set(i, fis);
-					param.append(twoHyphens).append(boundary).append(end)
-							.append("Content-Type: application/octet-stream").append(end)
-							.append("Content-Disposition: form-data; filename=\"file").append(i).append("\"; name=\"file").append(i).append("\"").append(end)
-							.append(end);
+					param.append(twoHyphens).append(boundary).append(end).append("Content-Type: application/octet-stream").append(end).append("Content-Disposition: form-data; filename=\"file").append(i).append("\"; name=\"file").append(i).append("\"").append(end).append(end);
 					byte[] data = new byte[fis.available()];
 					if (fis.read(data) != -1) {
 						dos.writeBytes(param.toString());
@@ -204,12 +201,7 @@ public class HttpRequest {
 			if (!params.isEmpty()) {
 				param.setLength(0);
 				for (String key : params.keySet()) {
-					param.append(end)
-							.append(twoHyphens).append(boundary).append(end)
-							.append("Content-Type: text/plain").append(end)
-							.append("Content-Disposition: form-data; name=\"").append(key).append("\"").append(end)
-							.append(end).append(URLEncoder.encode(params.get(key), "UTF-8")).append(end)
-							.append(twoHyphens).append(boundary).append(twoHyphens);
+					param.append(end).append(twoHyphens).append(boundary).append(end).append("Content-Type: text/plain").append(end).append("Content-Disposition: form-data; name=\"").append(key).append("\"").append(end).append(end).append(URLEncoder.encode(params.get(key), "UTF-8")).append(end).append(twoHyphens).append(boundary).append(twoHyphens);
 				}
 			}
 			dos.writeBytes(param.toString());

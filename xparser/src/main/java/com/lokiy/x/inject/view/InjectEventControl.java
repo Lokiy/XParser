@@ -63,7 +63,7 @@ public class InjectEventControl implements OnClickListener, OnLongClickListener,
 	private String itemClickMethod;
 	private String itemSelectMethod;
 	private String nothingSelectedMethod;
-	private String itemLongClickMehtod;
+	private String itemLongClickMehthod;
 	private String touchMethod;
 	private String checkedMethod;
 
@@ -82,7 +82,7 @@ public class InjectEventControl implements OnClickListener, OnLongClickListener,
 	}
 
 	public InjectEventControl itemLongClick(String method) {
-		this.itemLongClickMehtod = method;
+		this.itemLongClickMehthod = method;
 		return this;
 	}
 
@@ -116,7 +116,7 @@ public class InjectEventControl implements OnClickListener, OnLongClickListener,
 	}
 
 	public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-		return invokeMethod(itemLongClickMehtod, new Class[] {
+		return invokeMethod(itemLongClickMehthod, new Class[] {
 				AdapterView.class,
 				View.class,
 				int.class,
@@ -186,6 +186,9 @@ public class InjectEventControl implements OnClickListener, OnLongClickListener,
 	}
 
 	public static void linkedToMethod(Object target, ListenerType type, View view, String methodName) {
+		if (view == null) {
+			return;
+		}
 		if (methodName != null) {
 			InjectEventControl listener = new InjectEventControl(target);
 			switch (type) {
@@ -233,6 +236,9 @@ public class InjectEventControl implements OnClickListener, OnLongClickListener,
 	 * @param view view
 	 */
 	public static void initListener(Object target, View view) {
+		if (view == null) {
+			return;
+		}
 		Method[] methods = target.getClass().getDeclaredMethods();
 		if (methods != null && methods.length > 0) {
 			for (Method method : methods) {
@@ -254,6 +260,9 @@ public class InjectEventControl implements OnClickListener, OnLongClickListener,
 	}
 
 	public static void initView(Object activity, View view) {
+		if (view == null) {
+			return;
+		}
 		Field[] fields = activity.getClass().getDeclaredFields();
 		if (fields != null && fields.length > 0) {
 			for (Field field : fields) {

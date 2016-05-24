@@ -52,16 +52,6 @@ public class XRequestHandler implements RequestHandler {
 		int time = 0;
 		do {
 			try {
-				XConfig config = XParser.INSTANCE.getXConfig();
-				if (requestParams.headers == null)
-					requestParams.headers = new HashMap<>();
-				if (config.requestHeaders != null)
-					requestParams.headers.putAll(config.requestHeaders);
-				if (requestParams.params == null)
-					requestParams.params = new HashMap<>();
-				if (config.requestExtras != null)
-					requestParams.params.putAll(config.requestExtras);
-
 				result = onPost(url, requestParams);
 				time = 3;
 			} catch (Exception e) {
@@ -94,16 +84,6 @@ public class XRequestHandler implements RequestHandler {
 		int time = 0;
 		do {
 			try {
-				XConfig config = XParser.INSTANCE.getXConfig();
-				if (requestParams.headers == null)
-					requestParams.headers = new HashMap<>();
-				if (config.requestHeaders != null)
-					requestParams.headers.putAll(config.requestHeaders);
-				if (requestParams.params == null)
-					requestParams.params = new HashMap<>();
-				if (config.requestExtras != null)
-					requestParams.params.putAll(config.requestExtras);
-
 				result = onGet(url, requestParams);
 				time = 3;
 			} catch (Exception e) {

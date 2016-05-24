@@ -15,6 +15,7 @@
  */
 package com.lokiy.x.task;
 
+import com.lokiy.x.XConfig;
 import com.lokiy.x.XLog;
 import com.lokiy.x.XParser;
 import com.lokiy.x.XTask;
@@ -29,6 +30,7 @@ import com.lokiy.x.util.MD5;
 import com.lokiy.x.util.NetStatusUtils;
 
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -60,11 +62,7 @@ public class TaskHandler<T extends Serializable> extends XTask<T> {
 			if ((NetStatusUtils.isNetworkConnected() && (mParams.isForceRefresh || isCacheDataFailure(key)))) {
 				String resultString = null;
 				try {
-					RequestHandler.RequestParams requestParams = new RequestHandler.RequestParams();
-					requestParams.params = mParams.getParams();
-					requestParams.dataList = mParams.getDataList();
-					requestParams.headers = mParams.getHeaders();
-					requestParams.timeOut = mParams.timeOut;
+					RequestHandler.RequestParams requestParams = RequestHandler.RequestParams.createRequestParams(mParams.getHeaders(), mParams.getParams(), mParams.getDataList()).setTimeOut(mParams.timeOut);
 					switch (mParams.method) {
 						case GET:
 							resultString = mConfig.requestHandler.get(httpUrl, requestParams);
