@@ -6,26 +6,26 @@ ext {
 	bintrayName 		= getProperty("bintray.name")					// Project name in jcenter
 
 	publishedGroupId 	= getProperty("bintray.groupid") 				// Maven Group ID for the artifact
-	artifact 			= getProperty("bintray.artifact")				// Maven
+	artifact 		= getProperty("bintray.artifact")				// Maven
 
-	siteUrl 			= getProperty("bintray.site.url")
-	gitUrl 				= getProperty("bintray.git.url")
+	siteUrl 		= getProperty("bintray.site.url")
+	gitUrl 			= getProperty("bintray.git.url")
 
-	libraryDescription 	= getProperty("bintray.library.description")	// Project description
-	libraryName 		= getProperty("bintray.library.name")			// Project name
+	libraryDescription 	= getProperty("bintray.library.description")			// Project description
+	libraryName 		= getProperty("bintray.library.name")				// Project name
 	libraryVersion 		= getProperty('bintray.version');				// Project version
 
-	developerId 		= getProperty("bintray.developer.id")			// Developer ID
-	developerName 		= getProperty("bintray.developer.name")			// Developer Name
-	developerEmail 		= getProperty("bintray.developer.email")		// Developer Email
+	developerId 		= getProperty("bintray.developer.id")				// Developer ID
+	developerName 		= getProperty("bintray.developer.name")				// Developer Name
+	developerEmail 		= getProperty("bintray.developer.email")			// Developer Email
 
-	licenseName 		= getProperty("bintray.license.name")			// License name
-	licenseUrl 			= getProperty("bintray.license.url")			// License url
-	allLicenses 		= [getProperty("bintray.alllicenses")]			//
+	licenseName 		= getProperty("bintray.license.name")				// License name
+	licenseUrl 		= getProperty("bintray.license.url")				// License url
+	allLicenses 		= [getProperty("bintray.alllicenses")]				//
 }
 
-group					= publishedGroupId								// Maven Group ID for the artifact
-version					= libraryVersion
+group				= publishedGroupId						// Maven Group ID for the artifact
+version				= libraryVersion
 
 task sourcesJar(type: Jar) {
 	from android.sourceSets.main.java.srcDirs
