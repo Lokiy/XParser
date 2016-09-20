@@ -15,7 +15,6 @@
  */
 package com.lokiy.x.task;
 
-import com.lokiy.x.XConfig;
 import com.lokiy.x.XLog;
 import com.lokiy.x.XParser;
 import com.lokiy.x.XTask;
@@ -30,7 +29,6 @@ import com.lokiy.x.util.MD5;
 import com.lokiy.x.util.NetStatusUtils;
 
 import java.io.Serializable;
-import java.util.HashMap;
 import java.util.Map;
 
 /**

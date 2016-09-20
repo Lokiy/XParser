@@ -17,6 +17,7 @@ package com.lokiy.x.util;
 
 import android.graphics.PointF;
 
+import java.math.BigDecimal;
 import java.text.DecimalFormat;
 
 import static java.lang.Math.PI;
@@ -63,6 +64,37 @@ public class MathUtils {
 
 	public static boolean isZeroPrice(double d) {
 		return d < 0.01;
+	}
+
+	public static BigDecimal add(Number a, Number b) {
+		return add(String.valueOf(a), String.valueOf(b));
+	}
+
+	public static BigDecimal add(String a, String b) {
+		return new BigDecimal(a).add(new BigDecimal(b));
+	}
+	public static BigDecimal sub(Number a, Number b) {
+		return sub(String.valueOf(a), String.valueOf(b));
+	}
+
+	public static BigDecimal sub(String a, String b) {
+		return new BigDecimal(a).subtract(new BigDecimal(b));
+	}
+
+	public static BigDecimal div(Number a, Number b) {
+		return div(String.valueOf(a), String.valueOf(b));
+	}
+
+	public static BigDecimal div(String a, String b) {
+		return new BigDecimal(a).divide(new BigDecimal(b), 4, BigDecimal.ROUND_DOWN);
+	}
+
+	public static BigDecimal multiply(Number a, Number b) {
+		return multiply(String.valueOf(a), String.valueOf(b));
+	}
+
+	public static BigDecimal multiply(String a, String b) {
+		return new BigDecimal(a).multiply(new BigDecimal(b));
 	}
 
 	
